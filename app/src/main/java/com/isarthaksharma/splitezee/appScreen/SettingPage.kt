@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -32,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -115,24 +114,25 @@ fun SettingPage(
             )
         }
 
+        Spacer(modifier = Modifier.weight(1f))
         Button(
-            onClick = {
-                openAlertDialog = true
-            },
-            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.onErrorContainer),
+            onClick = { openAlertDialog = true },
+            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.onError),
             modifier = Modifier
                 .fillMaxWidth()
                 .shadow(elevation = 50.dp)
+                .padding(vertical = 20.dp)
+
         ) {
             Image(
-                Icons.Default.Logout,
+                Icons.AutoMirrored.Filled.Logout,
                 contentDescription = "Logout Button",
                 modifier = Modifier.size(30.dp),
             )
             Spacer(modifier = Modifier.width(14.dp))
             Text(
                 text = "Logout",
-                color = MaterialTheme.colorScheme.onBackground,
+                color = MaterialTheme.colorScheme.background,
                 style = MaterialTheme.typography.titleMedium
             )
         }

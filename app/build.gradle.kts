@@ -7,7 +7,6 @@ plugins {
     kotlin("plugin.serialization") version "2.0.21"
     id("com.google.gms.google-services")
 }
-
 android {
     namespace = "com.isarthaksharma.splitezee"
     compileSdk = 35
@@ -17,7 +16,7 @@ android {
         minSdk = 30
         targetSdk = 35
         versionCode = 1
-        versionName = "1.5.5"
+        versionName = "1.6.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -40,6 +39,8 @@ android {
     buildFeatures {
         compose = true
     }
+
+
 }
 
 dependencies {

@@ -26,9 +26,10 @@ class AuthenticationUserRepository @Inject constructor(
     private var auth: FirebaseAuth,
     @ApplicationContext private var context: Context
 ) {
+
     fun signInWithGoogle(): Flow<AuthResponse> = callbackFlow {
         val googleIdOption = GetGoogleIdOption.Builder()
-            .setServerClientId(context.getString(R.string.Web_ClintId))
+            .setServerClientId(context.getString(R.string.default_web_client_id))
             .setAutoSelectEnabled(false)  // Force showing account selection screen
             .setFilterByAuthorizedAccounts(false)
             .setNonce(nonce())
