@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -38,23 +40,34 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.isarthaksharma.splitezee.R
+import com.isarthaksharma.splitezee.ui.uiComponents.ExpenseShowCard
 import com.isarthaksharma.splitezee.viewModel.UserInfoViewModel
+import com.isarthaksharma.splitezee.viewModel.ViewModelPersonalDB
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomePage(
     modifier: Modifier,
     userInfoViewModel: UserInfoViewModel = hiltViewModel(),
+    viewModelPersonalDB: ViewModelPersonalDB = hiltViewModel(),
     goSetting: () -> Unit
 ) {
     val userProfile by userInfoViewModel.userProfile.collectAsState()
-    Column(modifier) {
+    val expenses by viewModelPersonalDB.expenses.collectAsState()
+
+    val todayExpense by viewModelPersonalDB.personalTodayExpense.collectAsState()
+    val monthExpense by viewModelPersonalDB.personalMonthExpense.collectAsState()
+    val totalExpense by viewModelPersonalDB.personalTotalExpense.collectAsState()
+
+    Column(
+        modifier
+    ) {
         Box {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
-            ){
+            ) {
                 Text(
                     text = "Hi ${userProfile?.userName},",
                     style = MaterialTheme.typography.displaySmallEmphasized,
@@ -68,16 +81,18 @@ fun HomePage(
                         .size(30.dp)
                         .clip(CircleShape)
                         .clickable(onClick = { goSetting() }, enabled = true),
-                    painter = if(userProfile?.userProfilePictureUrl == "null") painterResource(R.drawable.man_icon) else rememberAsyncImagePainter(userProfile?.userProfilePictureUrl),
+                    painter = if (userProfile?.userProfilePictureUrl == "null") painterResource(R.drawable.man_icon)
+                    else rememberAsyncImagePainter(userProfile?.userProfilePictureUrl),
                     contentDescription = "${userProfile?.userName}'s Picture",
                 )
             }
         }
 
         // Total Spent Banner
+
         Card(
             elevation = CardDefaults.cardElevation(70.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xff375fad)),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(180.dp),
@@ -104,20 +119,16 @@ fun HomePage(
                             // Total Spending
                             Text(
                                 text = "Total Spent",
-                                color = Color.White,
-                                modifier = Modifier
-                                    .padding(horizontal = 8.dp)
-                                    .shadow(20.dp),
-                                style = MaterialTheme.typography.labelMediumEmphasized,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                style = MaterialTheme.typography.headlineSmallEmphasized,
                                 fontFamily = FontFamily(Font(R.font.doto)),
                             )
                             Text(
-                                text = "₹ 2000",
-                                color = Color.White,
-                                modifier = Modifier
-                                    .padding(horizontal = 8.dp)
-                                    .shadow(20.dp),
-                                style = MaterialTheme.typography.titleLargeEmphasized,
+                                text = "${totalExpense ?: 0}",
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                style = MaterialTheme.typography.headlineMediumEmphasized,
                                 fontFamily = FontFamily(Font(R.font.doto)),
                             )
                         }
@@ -127,7 +138,7 @@ fun HomePage(
                         modifier = Modifier
                             .fillMaxHeight()
                             .width(2.dp),
-                        color = MaterialTheme.colorScheme.background
+                        color = MaterialTheme.colorScheme.onBackground
                     )
 
                     Box(
@@ -142,53 +153,57 @@ fun HomePage(
                             // Today
                             Text(
                                 text = "Today",
-                                color = Color.White,
-                                modifier = Modifier
-                                    .padding(horizontal = 8.dp)
-                                    .shadow(20.dp),
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(horizontal = 8.dp),
                                 fontFamily = FontFamily(Font(R.font.doto)),
-                                style = MaterialTheme.typography.labelMediumEmphasized,
+                                style = MaterialTheme.typography.headlineSmallEmphasized,
                             )
                             Text(
-                                text = "₹ 80",
-                                color = Color.White,
-                                modifier = Modifier
-                                    .padding(horizontal = 8.dp)
-                                    .shadow(20.dp),
-                                style = MaterialTheme.typography.titleLargeEmphasized,
+                                text = "${todayExpense ?: 0}",
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                style = MaterialTheme.typography.headlineMediumEmphasized,
                                 fontFamily = FontFamily(Font(R.font.doto)),
                             )
                             HorizontalDivider(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(2.dp),
-                                color = MaterialTheme.colorScheme.background
+                                color = MaterialTheme.colorScheme.onBackground
                             )
 
                             // Monthly
                             Text(
                                 text = "Monthly",
-                                color = Color.White,
-                                modifier = Modifier
-                                    .padding(horizontal = 8.dp)
-                                    .shadow(20.dp),
-                                style = MaterialTheme.typography.labelMediumEmphasized,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                style = MaterialTheme.typography.headlineSmallEmphasized,
                                 fontFamily = FontFamily(Font(R.font.doto)),
-                                )
+                            )
 
                             Text(
-                                text = "₹ 100",
-                                color = Color.White,
-                                modifier = Modifier
-                                    .padding(horizontal = 8.dp)
-                                    .shadow(20.dp),
-                                style = MaterialTheme.typography.titleLargeEmphasized,
+                                text = "${monthExpense?:0}",
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                style = MaterialTheme.typography.headlineMediumEmphasized,
                                 fontFamily = FontFamily(Font(R.font.doto)),
-                                )
+                            )
                         }
                     }
                 }
             }
         }
+        LazyColumn {
+            items(expenses) { expense ->
+                ExpenseShowCard(
+                    expense.expenseName,
+                    expense.expenseDate,
+                    expense.expenseAmt,
+                    expense.expenseMsg,
+                    expense.expenseCurrency
+                )
+            }
+        }
     }
 }
+

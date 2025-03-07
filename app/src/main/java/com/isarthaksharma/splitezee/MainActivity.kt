@@ -3,6 +3,7 @@ package com.isarthaksharma.splitezee
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -17,28 +18,40 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -47,6 +60,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.isarthaksharma.splitezee.appScreen.FinancePage
 import com.isarthaksharma.splitezee.appScreen.GroupPage
 import com.isarthaksharma.splitezee.appScreen.HomePage
 import com.isarthaksharma.splitezee.appScreen.LoginPage
@@ -54,6 +68,7 @@ import com.isarthaksharma.splitezee.appScreen.SettingPage
 import com.isarthaksharma.splitezee.appScreen.SplashScreen
 import com.isarthaksharma.splitezee.dataClass.BottomDataClass
 import com.isarthaksharma.splitezee.ui.theme.SplitezeeTheme
+import com.isarthaksharma.splitezee.ui.uiComponents.AddExpense
 import com.isarthaksharma.splitezee.utlility.NavigationUtility
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -72,76 +87,99 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
+
     var selectedItem by rememberSaveable { mutableIntStateOf(0) }
     var showBottomBar by rememberSaveable { mutableStateOf(false) }
+    var selectedBottomNavBar by rememberSaveable { mutableStateOf("") }
+
+    val sheetState = rememberModalBottomSheetState()
+    var isSheetOpen by rememberSaveable { mutableStateOf(false) }
+
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
                 Box(
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    NavigationBar(
-                        modifier = Modifier.align(Alignment.BottomCenter)
+                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                        .background(MaterialTheme.colorScheme.surface)
 
-                    ) {
+                ) {
+                    selectedBottomNavBar = "Personal"
+                    NavigationBar {
                         bottomItems().forEachIndexed { index, item ->
                             NavigationBarItem(
                                 selected = selectedItem == index,
                                 onClick = {
                                     selectedItem = index
+                                    selectedBottomNavBar = item.title
                                     navController.navigate(item.label)
                                 },
                                 icon = {
                                     Icon(
-                                        if (index == selectedItem) {
-                                            item.selectedIcon
-                                        } else {
-                                            item.unselectedIcon
-                                        },
+                                        if (index == selectedItem) item.selectedIcon else item.unselectedIcon,
                                         contentDescription = item.title
+                                    )
+                                },
+                                label = {
+                                    Text(
+                                        text = item.title,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = if (selectedItem == index) MaterialTheme.colorScheme.onBackground else Color.Gray
                                     )
                                 }
                             )
                         }
                     }
-
-                    // Floating Point
-                    FloatingActionButton(
-                        onClick = { /* Handle FAB click */ },
-                        shape = CircleShape,
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .size(60.dp)
-                            .align(Alignment.Center)
-                            .offset(y = (-40).dp)
-                            .zIndex(1f)
-
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Expense")
-                    }
                 }
             }
-        }) {
-        // Setting Background
-        val color = if (isSystemInDarkTheme()) Color.Black else Color.White
+        },
+
+        floatingActionButton = {
+            if (showBottomBar) {
+                FloatingActionButton(
+                    onClick = {
+                        if (selectedBottomNavBar == "Personal") {
+                            isSheetOpen = true
+                        }
+                    },
+                    shape = RectangleShape,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .offset(y = (-10).dp)
+                        .clip(RoundedCornerShape(10.dp))
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Expense")
+                }
+            }
+        }
+    ) { _ ->
 
         NavigationPage(
             modifier = Modifier
-                .background(color)
                 .fillMaxSize()
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(Color(0xFF99e365), Color(0xFF33a68c), Color(0xFF33a68c), Color(0xFF0b7fde)),
+                        start = androidx.compose.ui.geometry.Offset(Float.POSITIVE_INFINITY, 0f),
+                        end = androidx.compose.ui.geometry.Offset(0f, Float.POSITIVE_INFINITY)
+                    )
+                )
                 .padding(top = 40.dp, start = 10.dp, end = 10.dp),
             navController
-
         ) { isBottomBarVisible ->
             showBottomBar = isBottomBarVisible
         }
-
-
         SetStatusBarColor()
+    }
+
+    if (isSheetOpen) {
+        AddExpense(sheetState, onDismiss = { isSheetOpen = false })
     }
 }
 
@@ -171,7 +209,13 @@ fun bottomItems(): List<BottomDataClass> {
             label = "GroupPage",
             selectedIcon = Icons.Filled.Groups,
             unselectedIcon = Icons.Outlined.Groups
-        )
+        ),
+        BottomDataClass(
+            title = "Finance",
+            label = "FinancePage",
+            selectedIcon = Icons.Filled.CreditCard,
+            unselectedIcon = Icons.Outlined.CreditCard
+        ),
     )
     return item
 }
@@ -189,22 +233,14 @@ fun NavigationPage(
     ) {
         // Splash Screen Navigation
         composable(
-            route = NavigationUtility.SplashScreen,
-            enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start,
-                    tween(100)
-                )
-            },
-            exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start,
-                    tween(100)
-                )
-            }
-
+            route = NavigationUtility.SplashScreen
         ) {
-            SplashScreen(modifier) {
+            SplashScreen(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background( if (isSystemInDarkTheme()) Color.Black else Color.White)
+                    .padding(top = 40.dp, start = 10.dp, end = 10.dp)
+            ) {
                 if (it) {
                     navController.navigate(NavigationUtility.HomePage) {
                         popUpTo(NavigationUtility.SplashScreen) { inclusive = true }
@@ -283,7 +319,17 @@ fun NavigationPage(
             }
         ) {
             onBottomBarVisibilityChange(false)
-            SettingPage(modifier)
+            SettingPage(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background( if (isSystemInDarkTheme()) Color.Black else Color.White)
+                    .padding(top = 40.dp, start = 10.dp, end = 10.dp)
+            ) {
+                navController.navigate(NavigationUtility.LoginPage) {
+                    popUpTo(0) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
         }
 
         // Group Page
@@ -308,6 +354,27 @@ fun NavigationPage(
                     popUpTo(0) { inclusive = true }
                     launchSingleTop = true
                 }
+            }
+        }
+
+        // Finance Page
+        composable(
+            route = NavigationUtility.FinancePage,
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start,
+                    tween(100)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End,
+                    tween(100)
+                )
+            }
+        ){
+            FinancePage(modifier){
+                navController.navigate(NavigationUtility.SettingPage)
             }
         }
     }

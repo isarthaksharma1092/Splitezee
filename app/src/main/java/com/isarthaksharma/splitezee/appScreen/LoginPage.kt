@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,80 +40,92 @@ fun LoginPage(
     authenticateUserViewModel: AuthenticateUserViewModel = hiltViewModel(),
     goHomePage: () -> Unit
 ) {
-    val authState = authenticateUserViewModel.authState.collectAsState()
+    val authState by authenticateUserViewModel.authState.collectAsState()
     val context = LocalContext.current
     LaunchedEffect(authState) {
-        if (authState.value is AuthResponse.Success) {
+        if (authState is AuthResponse.Success) {
             goHomePage()
             Toast.makeText(context, "Welcome", Toast.LENGTH_LONG).show()
-
         }
     }
 
-    if (authState.value is AuthResponse.Loading) {
-        CustomProgressBar()
-    } else {
-        Column(
+    when (authState) {
+        is AuthResponse.Loading -> {
+            CustomProgressBar()
+        }
+        else -> {
+            LoginUI(authenticateUserViewModel)
+        }
+    }
+}
+
+@Composable
+fun LoginUI(authenticateUserViewModel: AuthenticateUserViewModel) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = 55.dp, horizontal = 15.dp),
+        verticalArrangement = Arrangement.SpaceEvenly,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Image(
+            painter = painterResource(id = R.drawable.app_icon),
+            contentDescription = "App Icon",
+            contentScale = ContentScale.FillHeight,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(vertical = 50.dp, horizontal = 10.dp),
-            verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .padding(top = 30.dp)
+                .height(250.dp)
+                .clip(CircleShape)
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Button(
+            onClick = {
+                authenticateUserViewModel.signInWithGoogle()
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(elevation = 50.dp)
         ) {
-
             Image(
-                painter = painterResource(id = R.drawable.app_icon),
-                contentDescription = "App Icon",
-                contentScale = ContentScale.FillHeight,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 15.dp)
-                    .height(250.dp)
-                    .clip(CircleShape)
+                painter = painterResource(id = R.drawable.google_icon),
+                contentDescription = "Google Icon",
+                modifier = Modifier.size(30.dp)
             )
+            Spacer(modifier = Modifier.width(14.dp))
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            Button(
-                onClick = {
-                    if (authState.value is AuthResponse.Success) {
-                        goHomePage()
-                    }
-                    authenticateUserViewModel.signInWithGoogle()
-
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(elevation = 50.dp)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.google_icon),
-                    contentDescription = "Google Icon",
-                    modifier = Modifier.size(30.dp)
-                )
-                Spacer(modifier = Modifier.width(14.dp))
-
-                Text(text = "Login with Google")
-            }
+            Text(text = "Login with Google")
         }
     }
 }
 
 @Composable
 fun CustomProgressBar() {
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .padding(vertical = 55.dp, horizontal = 15.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = 40.dp, horizontal = 15.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
         CircularProgressIndicator(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.onBackground,
-            strokeWidth = 5.dp
+            strokeWidth = 6.dp
         )
         Image(
-            painter = painterResource(R.drawable.app_icon),
-            contentScale = ContentScale.Fit,
-            contentDescription = null
+            painter = painterResource(id = R.drawable.app_icon),
+            contentDescription = "App Icon",
+            contentScale = ContentScale.FillHeight,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 30.dp)
+                .height(250.dp)
+                .clip(CircleShape)
         )
     }
 }
