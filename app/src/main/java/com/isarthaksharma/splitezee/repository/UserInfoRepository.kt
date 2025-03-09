@@ -11,9 +11,9 @@ class UserInfoRepository @Inject constructor(
         val user = auth.currentUser
         return user?.providerData?.let {
             userInfoFromGoogle(
-                userName = it[0].phoneNumber ?:"",
+                userName = it[0].displayName ?:"",
                 userEmail = it[0].email ?:"",
-                userProfilePictureUrl = it[0].photoUrl.toString()?:""
+                userProfilePictureUrl = it[0].photoUrl.toString()
             )
         }
     }

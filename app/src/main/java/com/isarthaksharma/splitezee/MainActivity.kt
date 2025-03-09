@@ -13,28 +13,21 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -46,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
@@ -62,7 +54,6 @@ import com.isarthaksharma.splitezee.appScreen.SettingPage
 import com.isarthaksharma.splitezee.appScreen.SplashScreen
 import com.isarthaksharma.splitezee.dataClass.BottomDataClass
 import com.isarthaksharma.splitezee.ui.theme.SplitezeeTheme
-import com.isarthaksharma.splitezee.ui.uiComponents.AddExpense
 import com.isarthaksharma.splitezee.utlility.NavigationUtility
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -81,24 +72,20 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-
     var selectedItem by rememberSaveable { mutableIntStateOf(0) }
     var showBottomBar by rememberSaveable { mutableStateOf(false) }
     var selectedBottomNavBar by rememberSaveable { mutableStateOf("") }
-
-    val sheetState = rememberModalBottomSheetState()
-    var isSheetOpen by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
                 Box(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                         .background(MaterialTheme.colorScheme.surface)
 
@@ -131,26 +118,6 @@ fun MainScreen() {
                     }
                 }
             }
-        },
-
-        floatingActionButton = {
-            if (showBottomBar) {
-                FloatingActionButton(
-                    onClick = {
-                        if (selectedBottomNavBar == "Personal") {
-                            isSheetOpen = true
-                        }
-                    },
-                    shape = RectangleShape,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .size(60.dp)
-                        .offset(y = (-10).dp)
-                        .clip(RoundedCornerShape(10.dp))
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Expense")
-                }
-            }
         }
     ) { _ ->
 
@@ -159,21 +126,28 @@ fun MainScreen() {
                 .fillMaxSize()
                 .background(
                     brush = Brush.linearGradient(
-                        colors = listOf(Color(0xFF99e365), Color(0xFF33a68c), Color(0xFF33a68c), Color(0xFF0b7fde)),
-                        start = androidx.compose.ui.geometry.Offset(Float.POSITIVE_INFINITY, 0f),
-                        end = androidx.compose.ui.geometry.Offset(0f, Float.POSITIVE_INFINITY)
+                        colors = listOf(
+                            Color(0xFF99e365),
+                            Color(0xFF33a68c),
+                            Color(0xFF33a68c),
+                            Color(0xFF0b7fde)
+                        ),
+                        start = androidx.compose.ui.geometry.Offset(
+                            Float.POSITIVE_INFINITY,
+                            0f
+                        ),
+                        end = androidx.compose.ui.geometry.Offset(
+                            0f,
+                            Float.POSITIVE_INFINITY
+                        )
                     )
                 )
-                .padding(top = 40.dp, start = 10.dp, end = 10.dp),
+                .padding(top = 40.dp, start = 10.dp, end = 10.dp, bottom = 100.dp),
             navController
         ) { isBottomBarVisible ->
             showBottomBar = isBottomBarVisible
         }
         SetStatusBarColor()
-    }
-
-    if (isSheetOpen) {
-        AddExpense(sheetState, onDismiss = { isSheetOpen = false })
     }
 }
 
@@ -232,9 +206,10 @@ fun NavigationPage(
             SplashScreen(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background( if (isSystemInDarkTheme()) Color.Black else Color.White)
+                    .background(if (isSystemInDarkTheme()) Color.Black else Color.White)
                     .padding(top = 40.dp, start = 10.dp, end = 10.dp)
             ) {
+
                 if (it) {
                     navController.navigate(NavigationUtility.HomePage) {
                         popUpTo(NavigationUtility.SplashScreen) { inclusive = true }
@@ -268,6 +243,7 @@ fun NavigationPage(
             onBottomBarVisibilityChange(false)
             LoginPage {
                 navController.navigate(NavigationUtility.HomePage) {
+
                     popUpTo(NavigationUtility.HomePage) { inclusive = true }
                     launchSingleTop = true
                 }
@@ -313,12 +289,7 @@ fun NavigationPage(
             }
         ) {
             onBottomBarVisibilityChange(false)
-            SettingPage(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background( if (isSystemInDarkTheme()) Color.Black else Color.White)
-                    .padding(top = 40.dp, start = 10.dp, end = 10.dp)
-            ) {
+            SettingPage {
                 navController.navigate(NavigationUtility.LoginPage) {
                     popUpTo(0) { inclusive = true }
                     launchSingleTop = true
@@ -343,12 +314,7 @@ fun NavigationPage(
             }
         ) {
             onBottomBarVisibilityChange(true)
-            GroupPage(modifier) {
-                navController.navigate(NavigationUtility.SettingPage) {
-                    popUpTo(0) { inclusive = true }
-                    launchSingleTop = true
-                }
-            }
+            GroupPage(modifier)
         }
 
         // Finance Page
@@ -366,7 +332,7 @@ fun NavigationPage(
                     animationSpec = tween(durationMillis = 300)
                 )
             }
-        ){
+        ) {
             FinancePage(modifier)
         }
     }

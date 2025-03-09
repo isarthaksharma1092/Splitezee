@@ -1,6 +1,14 @@
+@file:Suppress("DEPRECATION")
+
 package com.isarthaksharma.splitezee.appScreen
 
+import android.content.Intent
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,8 +38,14 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
 import com.isarthaksharma.splitezee.R
 import com.isarthaksharma.splitezee.repository.AuthResponse
 import com.isarthaksharma.splitezee.viewModel.AuthenticateUserViewModel
@@ -42,6 +57,7 @@ fun LoginPage(
 ) {
     val authState by authenticateUserViewModel.authState.collectAsState()
     val context = LocalContext.current
+
     LaunchedEffect(authState) {
         if (authState is AuthResponse.Success) {
             goHomePage()
@@ -49,18 +65,25 @@ fun LoginPage(
         }
     }
 
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try { authenticateUserViewModel.signInWithGoogle(task) }
+        catch (e: ApiException) {
+            Toast.makeText(context, "Google Sign-In failed ${e.statusCode}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     when (authState) {
-        is AuthResponse.Loading -> {
-            CustomProgressBar()
-        }
-        else -> {
-            LoginUI(authenticateUserViewModel)
-        }
+        is AuthResponse.Loading -> CustomProgressBar()
+        else -> LoginUI(authenticateUserViewModel,launcher)
     }
 }
 
 @Composable
-fun LoginUI(authenticateUserViewModel: AuthenticateUserViewModel) {
+fun LoginUI(
+    authenticateUserViewModel: AuthenticateUserViewModel,
+    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -68,7 +91,6 @@ fun LoginUI(authenticateUserViewModel: AuthenticateUserViewModel) {
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Image(
             painter = painterResource(id = R.drawable.app_icon),
             contentDescription = "App Icon",
@@ -84,7 +106,9 @@ fun LoginUI(authenticateUserViewModel: AuthenticateUserViewModel) {
 
         Button(
             onClick = {
-                authenticateUserViewModel.signInWithGoogle()
+                val signInIntent = authenticateUserViewModel.getGoogleSignInIntent()
+                Log.d("GoogleSignIn", "Launching Google Sign-In Intent")
+                launcher.launch(signInIntent)
             },
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             modifier = Modifier
@@ -97,35 +121,56 @@ fun LoginUI(authenticateUserViewModel: AuthenticateUserViewModel) {
                 modifier = Modifier.size(30.dp)
             )
             Spacer(modifier = Modifier.width(14.dp))
-
             Text(text = "Login with Google")
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CustomProgressBar() {
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(vertical = 40.dp, horizontal = 15.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ){
-        CircularProgressIndicator(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.onBackground,
-            strokeWidth = 6.dp
-        )
-        Image(
-            painter = painterResource(id = R.drawable.app_icon),
-            contentDescription = "App Icon",
-            contentScale = ContentScale.FillHeight,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 30.dp)
-                .height(250.dp)
-                .clip(CircleShape)
-        )
+            .padding(vertical = 55.dp, horizontal = 15.dp),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Column {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.size(350.dp)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .align(Alignment.Center),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    strokeWidth = 5.dp
+                )
+
+                Image(
+                    painter = painterResource(id = R.drawable.app_icon),
+                    contentDescription = "App Icon",
+                    contentScale = ContentScale.FillHeight,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter)
+                        .padding(top = 30.dp)
+                        .height(250.dp)
+                        .clip(CircleShape)
+                )
+            }
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.size(350.dp)
+            ) {
+                Text(
+                    text = "Please wait while we set this device up for you, this may take a few moments.....",
+                    style = MaterialTheme.typography.bodyMediumEmphasized,
+                    textAlign = TextAlign.Justify,
+                    fontFamily = FontFamily( Font(R.font.doto,FontWeight.Bold))
+                )
+            }
+        }
     }
 }

@@ -42,7 +42,7 @@ android {
 
 
 }
-
+//noinspection UseTomlInstead
 dependencies {
 
     implementation(libs.androidx.core.ktx)

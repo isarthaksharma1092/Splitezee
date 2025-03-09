@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.credentials.CredentialManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import dagger.Module
 import dagger.Provides
@@ -17,16 +19,17 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 class FirebaseInstance {
 
-    // Provides a singleton instance of Firebase Authentication
     @Provides
     @Singleton
-    fun provideFirebaseAuth():FirebaseAuth = Firebase.auth
+    fun provideFirebaseAuth(): FirebaseAuth = Firebase.auth
 
-    // Provides a singleton instance of CredentialManager for handling user credentials securely
     @Provides
     @Singleton
-    fun provideCredentialManager(@ApplicationContext context: Context): CredentialManager{
+    fun provideFirebaseFirestore(): FirebaseFirestore = Firebase.firestore
+
+    @Provides
+    @Singleton
+    fun provideCredentialManager(@ApplicationContext context: Context): CredentialManager {
         return CredentialManager.create(context)
     }
-
 }
