@@ -1,4 +1,4 @@
-package com.isarthaksharma.splitezee.dataClass
+package com.isarthaksharma.splitezee.localStorage.dataClass
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

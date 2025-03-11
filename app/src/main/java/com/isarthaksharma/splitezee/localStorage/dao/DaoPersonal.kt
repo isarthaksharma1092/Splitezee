@@ -1,10 +1,10 @@
-package com.isarthaksharma.splitezee.localStorage
+package com.isarthaksharma.splitezee.localStorage.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import com.isarthaksharma.splitezee.dataClass.PersonalDataClass
+import com.isarthaksharma.splitezee.localStorage.dataClass.PersonalDataClass
 import kotlinx.coroutines.flow.Flow
 
 @Dao

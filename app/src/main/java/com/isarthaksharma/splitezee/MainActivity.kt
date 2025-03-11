@@ -96,9 +96,14 @@ fun MainScreen() {
                             NavigationBarItem(
                                 selected = selectedItem == index,
                                 onClick = {
-                                    selectedItem = index
-                                    selectedBottomNavBar = item.title
-                                    navController.navigate(item.label)
+                                    if (selectedItem != index) {
+                                        selectedItem = index
+                                        selectedBottomNavBar = item.title
+                                        navController.navigate(item.label){
+                                            popUpTo(0) { inclusive = true }
+                                            launchSingleTop = true
+                                        }
+                                    }
                                 },
                                 icon = {
                                     Icon(
@@ -333,7 +338,7 @@ fun NavigationPage(
                 )
             }
         ) {
-            FinancePage(modifier)
+            FinancePage(modifier,navController)
         }
     }
 }

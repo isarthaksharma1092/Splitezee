@@ -2,7 +2,7 @@ package com.isarthaksharma.splitezee.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.isarthaksharma.splitezee.dataClass.PersonalDataClass
+import com.isarthaksharma.splitezee.localStorage.dataClass.PersonalDataClass
 import com.isarthaksharma.splitezee.repository.RepositoryPersonalDB
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +23,7 @@ class ViewModelPersonalDB @Inject constructor(private val repository: Repository
         .stateIn(viewModelScope, SharingStarted.Lazily, 0L)
     val personalMonthExpense: StateFlow<Long?> = repository.getPersonalMonthExpense()
         .stateIn(viewModelScope, SharingStarted.Lazily, 0L)
-    val personalTotalExpense: StateFlow<Long?> = repository.getPersonalAllExpense()
+    val personalAllExpense: StateFlow<Long?> = repository.getPersonalAllExpense()
         .stateIn(viewModelScope, SharingStarted.Lazily, 0L)
 
     init {
@@ -58,15 +58,13 @@ class ViewModelPersonalDB @Inject constructor(private val repository: Repository
         }
     }
 
-
     fun getPersonalAllExpense() {
         viewModelScope.launch {
             repository.getPersonalAllExpense()
         }
     }
 
-
-    suspend fun cleanAllUserData() {
+    fun cleanAllUserData() {
         viewModelScope.launch {
             repository.clearUserData()
         }

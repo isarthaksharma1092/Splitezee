@@ -65,7 +65,7 @@ fun HomePage(
 
     val todayExpense by viewModelPersonalDB.personalTodayExpense.collectAsState()
     val monthExpense by viewModelPersonalDB.personalMonthExpense.collectAsState()
-    val totalExpense by viewModelPersonalDB.personalTotalExpense.collectAsState()
+    val totalExpense by viewModelPersonalDB.personalAllExpense.collectAsState()
 
     val sheetState = rememberModalBottomSheetState()
     var isPersonalSheetOpen by rememberSaveable { mutableStateOf(false) }
@@ -133,7 +133,7 @@ fun HomePage(
                                 fontFamily = FontFamily(Font(R.font.doto)),
                             )
                             Text(
-                                text = " ${totalExpense ?: 0}",
+                                text = "₹ ${totalExpense ?: 0}",
                                 color = MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.padding(horizontal = 8.dp),
                                 style = MaterialTheme.typography.headlineMediumEmphasized,
@@ -167,7 +167,7 @@ fun HomePage(
                                 style = MaterialTheme.typography.headlineSmallEmphasized,
                             )
                             Text(
-                                text = " ${todayExpense ?: 0}",
+                                text = "₹ ${todayExpense ?: 0}",
                                 color = MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.padding(horizontal = 8.dp),
                                 style = MaterialTheme.typography.headlineMediumEmphasized,
@@ -190,7 +190,7 @@ fun HomePage(
                             )
 
                             Text(
-                                text = "${monthExpense ?: 0}",
+                                text = "₹ ${monthExpense ?: 0}",
                                 color = MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.padding(horizontal = 8.dp),
                                 style = MaterialTheme.typography.headlineMediumEmphasized,
@@ -214,7 +214,7 @@ fun HomePage(
         }
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomEnd // ✅ Ensures FAB is at the bottom-right
+            contentAlignment = Alignment.BottomEnd
         ) {
             FloatingActionButton(
                 onClick = { isPersonalSheetOpen = true },

@@ -26,17 +26,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.HiltViewModelFactory
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.isarthaksharma.splitezee.dataClass.PersonalDataClass
-import com.isarthaksharma.splitezee.localStorage.DatabasePersonal
+import com.isarthaksharma.splitezee.localStorage.dataClass.PersonalDataClass
 import com.isarthaksharma.splitezee.viewModel.ViewModelPersonalDB
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -48,7 +41,6 @@ fun AddExpense(
     sheetState: SheetState,
     onDismiss:()->Unit,
     viewModelPersonalDB: ViewModelPersonalDB = hiltViewModel()
-
 ) {
     val context = LocalContext.current
     val mCalendar = Calendar.getInstance()

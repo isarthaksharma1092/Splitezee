@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -15,27 +17,42 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.isarthaksharma.splitezee.R
+import com.isarthaksharma.splitezee.ui.uiComponents.CreateGroup
+import com.isarthaksharma.splitezee.ui.uiComponents.GroupItem
+import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDB
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GroupPage(
-    modifier: Modifier
-){
+    modifier: Modifier,
+    viewModelGroupDB: ViewModelGroupDB = hiltViewModel()
+) {
+    val context = LocalContext.current
+    var isGroupSheetOpen by rememberSaveable { mutableStateOf(false) }
+    val groupDB by viewModelGroupDB.group.collectAsState()
+
     Column(modifier) {
         Box {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
-            ){
+            ) {
                 Text(
                     text = "Groups",
                     style = MaterialTheme.typography.displaySmallEmphasized,
@@ -46,14 +63,26 @@ fun GroupPage(
                 )
             }
         }
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ){
+            items(groupDB) {
+                GroupItem(
+                    it.groupName,
+                    it.groupAdmin,
+                    it.groupMembers,
+                    totalExpense = 0.0,
+                    personalBalance = 0.0
+                )
+            }
+        }
+
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomEnd // ✅ Ensures FAB is at the bottom-right
+            contentAlignment = Alignment.BottomEnd
         ) {
             FloatingActionButton(
-                onClick = {
-//                    isGroupSheetOpen = true
-                },
+                onClick = { isGroupSheetOpen = true },
                 modifier = Modifier.padding(10.dp),
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
@@ -71,5 +100,11 @@ fun GroupPage(
                 }
             }
         }
+
+    }
+    if (isGroupSheetOpen) {
+        CreateGroup(
+            onDismiss = { isGroupSheetOpen = false },
+        )
     }
 }

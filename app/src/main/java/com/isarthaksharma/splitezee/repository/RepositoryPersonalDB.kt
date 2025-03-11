@@ -1,7 +1,7 @@
 package com.isarthaksharma.splitezee.repository
 
-import com.isarthaksharma.splitezee.dataClass.PersonalDataClass
-import com.isarthaksharma.splitezee.localStorage.DaoPersonal
+import com.isarthaksharma.splitezee.localStorage.dataClass.PersonalDataClass
+import com.isarthaksharma.splitezee.localStorage.dao.DaoPersonal
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
