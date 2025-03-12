@@ -24,7 +24,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -42,12 +41,17 @@ fun GroupPage(
     modifier: Modifier,
     viewModelGroupDB: ViewModelGroupDB = hiltViewModel()
 ) {
-    val context = LocalContext.current
+//    val context = LocalContext.current
     var isGroupSheetOpen by rememberSaveable { mutableStateOf(false) }
     val groupDB by viewModelGroupDB.group.collectAsState()
 
-    Column(modifier) {
-        Box {
+    Box(
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // **Header**
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -62,49 +66,49 @@ fun GroupPage(
                     modifier = Modifier.padding(vertical = 10.dp)
                 )
             }
-        }
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ){
-            items(groupDB) {
-                GroupItem(
-                    it.groupName,
-                    it.groupAdmin,
-                    it.groupMembers,
-                    totalExpense = 0.0,
-                    personalBalance = 0.0
-                )
-            }
-        }
 
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomEnd
-        ) {
-            FloatingActionButton(
-                onClick = { isGroupSheetOpen = true },
-                modifier = Modifier.padding(10.dp),
-                containerColor = MaterialTheme.colorScheme.primary
+            // **Group List**
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Row {
-                    Icon(
-                        Icons.Default.GroupAdd,
-                        contentDescription = null,
-                        modifier = Modifier.padding(horizontal = 5.dp)
-                    )
-                    Text(
-                        text = "Create Group",
-                        modifier = Modifier.padding(horizontal = 5.dp),
-                        textAlign = TextAlign.Center
+                items(groupDB) {
+                    GroupItem(
+                        it.groupName,
+                        it.groupAdmin,
+                        it.groupMembers,
+                        totalExpense = 0.0,
+                        personalBalance = 0.0
                     )
                 }
             }
         }
 
+        // **Floating Action Button (FAB)**
+        FloatingActionButton(
+            onClick = { isGroupSheetOpen = true },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            containerColor = MaterialTheme.colorScheme.primary
+        ) {
+            Row {
+                Icon(
+                    Icons.Default.GroupAdd,
+                    contentDescription = null,
+                    modifier = Modifier.padding(horizontal = 5.dp)
+                )
+                Text(
+                    text = "Create Group",
+                    modifier = Modifier.padding(horizontal = 5.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
+
+    // **Create Group Bottom Sheet**
     if (isGroupSheetOpen) {
-        CreateGroup(
-            onDismiss = { isGroupSheetOpen = false },
-        )
+        CreateGroup(onDismiss = { isGroupSheetOpen = false })
     }
 }

@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.isarthaksharma.splitezee.localStorage.dataClass.PersonalDataClass
+import com.isarthaksharma.splitezee.viewModel.ViewModelFireStoreUpload
 import com.isarthaksharma.splitezee.viewModel.ViewModelPersonalDB
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -40,7 +41,8 @@ import java.util.Locale
 fun AddExpense(
     sheetState: SheetState,
     onDismiss:()->Unit,
-    viewModelPersonalDB: ViewModelPersonalDB = hiltViewModel()
+    viewModelPersonalDB: ViewModelPersonalDB = hiltViewModel(),
+    viewModelFireStoreUpload: ViewModelFireStoreUpload = hiltViewModel()
 ) {
     val context = LocalContext.current
     val mCalendar = Calendar.getInstance()
@@ -97,6 +99,7 @@ fun AddExpense(
                 leadingIcon = { Icon(Icons.AutoMirrored.Filled.NoteAdd, contentDescription = null) }
             )
 
+            // Add time to your Expense
             Button(
                 onClick = {
                     datePickerDialog.datePicker.maxDate = mCalendar.timeInMillis
@@ -108,6 +111,7 @@ fun AddExpense(
                 Text(text = formattedDate)
             }
 
+            // Expense Adding
             Button(
                 onClick = {
                     if(expenseState.isEmpty()){
@@ -125,7 +129,10 @@ fun AddExpense(
                             expenseDate = selectedDate.longValue,
                             expenseCurrency = "₹"
                         )
+                        // Saving to ROOM
                         viewModelPersonalDB.addPersonalExpense(expense)
+                        // Saving to FireStore
+                        viewModelFireStoreUpload.uploadPersonalExpense(expense)
                         onDismiss()
                     }
                 },

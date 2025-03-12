@@ -6,7 +6,8 @@ import androidx.room.PrimaryKey
 @Entity
 data class PersonalDataClass(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    val expenseId: Int = 0,
+    val firestoreExpenseId: String = "",
     val expenseName: String,
     val expenseAmt: Double,
     val expenseMsg: String?,

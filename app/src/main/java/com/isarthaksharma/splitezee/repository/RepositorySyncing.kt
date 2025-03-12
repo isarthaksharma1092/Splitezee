@@ -4,24 +4,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import android.util.Log
-import kotlinx.coroutines.tasks.await
 
 class RepositorySyncing @Inject constructor(private val firestore: FirebaseFirestore) {
 
-    suspend fun checkIfEmailExists(email: String): Boolean {
-        return try {
-            val querySnapshot = firestore.collection("users")
-                .whereEqualTo("email", email)
-                .limit(1)
-                .get()
-                .await()
 
-            !querySnapshot.isEmpty
-        } catch (e: Exception) {
-            Log.e("Firestore", "Error checking email existence: ${e.message}")
-            false // Return false in case of failure
-        }
-    }
 
     suspend fun createGroup(groupName: String, createdByEmail: String, members: List<String>): Result<String> {
         val groupId = firestore.collection("groups").document().id

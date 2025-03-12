@@ -70,8 +70,13 @@ fun HomePage(
     val sheetState = rememberModalBottomSheetState()
     var isPersonalSheetOpen by rememberSaveable { mutableStateOf(false) }
 
-    Column(modifier) {
-        Box {
+    Box(
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Header (Greeting + Profile Picture)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -87,89 +92,77 @@ fun HomePage(
                 )
                 Image(
                     modifier = Modifier
-                        .size(30.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
                         .clickable(onClick = { goSetting() }, enabled = true),
-                    painter = if (userProfile?.userProfilePictureUrl == "null") painterResource(R.drawable.man_icon)
-                    else rememberAsyncImagePainter(userProfile?.userProfilePictureUrl),
+                    painter = if (userProfile?.userProfilePictureUrl == "null") painterResource(
+                        R.drawable.man_icon
+                    ) else rememberAsyncImagePainter(userProfile?.userProfilePictureUrl),
                     contentDescription = "${userProfile?.userName}'s Picture",
                 )
             }
-        }
 
-        // Total Spent Banner
-        Card(
-            elevation = CardDefaults.cardElevation(70.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp),
-        )
-        {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+            // **Total Spent Banner**
+            Card(
+                elevation = CardDefaults.cardElevation(70.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .padding(bottom = 5.dp),
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier.weight(1f)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        // **Total Spending Column**
                         Column(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.SpaceEvenly,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-
-                            // Total Spending
                             Text(
                                 text = "Total Spent",
                                 color = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.padding(horizontal = 8.dp),
                                 style = MaterialTheme.typography.headlineSmallEmphasized,
                                 fontFamily = FontFamily(Font(R.font.doto)),
                             )
                             Text(
                                 text = "₹ ${totalExpense ?: 0}",
                                 color = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.padding(horizontal = 8.dp),
                                 style = MaterialTheme.typography.headlineMediumEmphasized,
                                 fontFamily = FontFamily(Font(R.font.doto)),
                             )
                         }
-                    }
 
-                    VerticalDivider(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .width(2.dp),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
+                        // **Vertical Divider**
+                        VerticalDivider(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .width(2.dp),
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
 
-                    Box(
-                        modifier = Modifier.weight(1f)
-                    ) {
+                        // **Today & Monthly Expense Column**
                         Column(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.SpaceEvenly,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-
-                            // Today
                             Text(
                                 text = "Today",
                                 color = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                fontFamily = FontFamily(Font(R.font.doto)),
                                 style = MaterialTheme.typography.headlineSmallEmphasized,
+                                fontFamily = FontFamily(Font(R.font.doto)),
                             )
                             Text(
                                 text = "₹ ${todayExpense ?: 0}",
                                 color = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.padding(horizontal = 8.dp),
                                 style = MaterialTheme.typography.headlineMediumEmphasized,
                                 fontFamily = FontFamily(Font(R.font.doto)),
                             )
@@ -179,20 +172,15 @@ fun HomePage(
                                     .height(2.dp),
                                 color = MaterialTheme.colorScheme.onBackground
                             )
-
-                            // Monthly
                             Text(
                                 text = "Monthly",
                                 color = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.padding(horizontal = 8.dp),
                                 style = MaterialTheme.typography.headlineSmallEmphasized,
                                 fontFamily = FontFamily(Font(R.font.doto)),
                             )
-
                             Text(
                                 text = "₹ ${monthExpense ?: 0}",
                                 color = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.padding(horizontal = 8.dp),
                                 style = MaterialTheme.typography.headlineMediumEmphasized,
                                 fontFamily = FontFamily(Font(R.font.doto)),
                             )
@@ -200,42 +188,48 @@ fun HomePage(
                     }
                 }
             }
-        }
-        LazyColumn {
-            items(expenses) { expense ->
-                ExpenseShowCard(
-                    expense.expenseName,
-                    expense.expenseDate,
-                    expense.expenseAmt,
-                    expense.expenseMsg,
-                    expense.expenseCurrency
-                )
-            }
-        }
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomEnd
-        ) {
-            FloatingActionButton(
-                onClick = { isPersonalSheetOpen = true },
-                modifier = Modifier.padding(10.dp),
-                containerColor = MaterialTheme.colorScheme.primary
+
+            // **Expense List**
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Row {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = null,
-                        modifier = Modifier.padding(horizontal = 5.dp)
-                    )
-                    Text(
-                        text = "Add Expense",
-                        modifier = Modifier.padding(horizontal = 5.dp),
-                        textAlign = TextAlign.Center
+                items(expenses) { expense ->
+                    ExpenseShowCard(
+                        expense.expenseName,
+                        expense.expenseDate,
+                        expense.expenseAmt,
+                        expense.expenseMsg,
+                        expense.expenseCurrency
                     )
                 }
             }
         }
+
+        // **Floating Action Button (FAB)**
+        FloatingActionButton(
+            onClick = { isPersonalSheetOpen = true },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            containerColor = MaterialTheme.colorScheme.primary
+        ) {
+            Row {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.padding(horizontal = 5.dp)
+                )
+                Text(
+                    text = "Add Expense",
+                    modifier = Modifier.padding(horizontal = 5.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
+
+    // **Add Expense Bottom Sheet**
     if (isPersonalSheetOpen) {
         AddExpense(sheetState, onDismiss = { isPersonalSheetOpen = false })
     }

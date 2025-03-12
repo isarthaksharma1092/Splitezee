@@ -25,7 +25,7 @@ class FirebaseInstance {
 
     @Provides
     @Singleton
-    fun provideFirebaseFirestore(): FirebaseFirestore = Firebase.firestore
+    fun provideFirebaseFireStore(): FirebaseFirestore = Firebase.firestore
 
     @Provides
     @Singleton

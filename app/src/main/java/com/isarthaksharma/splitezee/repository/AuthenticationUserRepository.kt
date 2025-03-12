@@ -40,14 +40,15 @@ class AuthenticationUserRepository @Inject constructor(
             val account = task.getResult(ApiException::class.java)
             val credential = GoogleAuthProvider.getCredential(account.idToken, null)
             val authResult = auth.signInWithCredential(credential).await()
-            saveUserToFirestore(authResult.user)
+            saveUserToFireStore(authResult.user)
             AuthResponse.Success
         } catch (e: Exception) {
             AuthResponse.Error(e.message ?: "Unknown error")
         }
     }
 
-    private suspend fun saveUserToFirestore(user: FirebaseUser?) {
+    // Uploading to FireStore
+    private suspend fun saveUserToFireStore(user: FirebaseUser?) {
         user?.let {
             val userData = hashMapOf(
                 "userId" to it.uid,

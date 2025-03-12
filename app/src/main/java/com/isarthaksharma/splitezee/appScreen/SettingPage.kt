@@ -64,19 +64,16 @@ fun SettingPage(
     var selectedCurrency by remember { mutableStateOf("₹ - Indian Rupee") }
     val context = LocalContext.current
 
-    Column {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(if (isSystemInDarkTheme()) Color.Black else Color.White)
-
-        ) {
+    Column(modifier = Modifier
+        .background(if (isSystemInDarkTheme()) Color.Black else Color.White)
+        .padding(top = 40.dp, start = 10.dp, end = 10.dp)){
+        Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = "Settings",
-                modifier = Modifier.padding(top = 40.dp, start = 10.dp, end = 10.dp),
                 style = MaterialTheme.typography.displaySmallEmphasized,
                 fontFamily = FontFamily(Font(R.font.doto, FontWeight.ExtraBold)),
                 color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.padding(16.dp))
@@ -108,7 +105,7 @@ fun SettingPage(
                     Spacer(modifier = Modifier.weight(.1f))
                     Image(
                         modifier = Modifier
-                            .size(30.dp)
+                            .size(50.dp)
                             .clip(CircleShape),
                         painter = if (userProfile?.userProfilePictureUrl == "null") painterResource(
                             R.drawable.man_icon

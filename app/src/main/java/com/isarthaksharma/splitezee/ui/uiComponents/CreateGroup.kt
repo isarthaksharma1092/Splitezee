@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDataClass
+import com.isarthaksharma.splitezee.viewModel.ViewModelFireStoreUpload
 import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDB
 import java.util.regex.Pattern
 
@@ -45,15 +47,28 @@ import java.util.regex.Pattern
 @Composable
 fun CreateGroup(
     onDismiss: () -> Unit,
-    viewModelGroupDB: ViewModelGroupDB = hiltViewModel()
-
+    viewModelGroupDB: ViewModelGroupDB = hiltViewModel(),
+    viewModelFireStoreUpload: ViewModelFireStoreUpload = hiltViewModel()
 ) {
+    var isEmailExists by remember { mutableStateOf<Boolean?>(null) }
+
     var groupName by remember { mutableStateOf("") }
     var memberEmail by remember { mutableStateOf("") }
     val selectedMembers = remember { mutableStateListOf<String>() }
     val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: ""
     val context = LocalContext.current
 
+    LaunchedEffect(viewModelFireStoreUpload.emailExists.collectAsState().value) {
+        isEmailExists = viewModelFireStoreUpload.emailExists.value
+        if (isEmailExists == true) {
+            val email = memberEmail.trim()
+            if (email.isNotEmpty() && email != currentUserEmail && !selectedMembers.contains(email)) {
+                selectedMembers.add(email)
+                memberEmail = ""
+            }
+        }
+        else Toast.makeText(context, "No User Found !", Toast.LENGTH_SHORT).show()
+    }
     LaunchedEffect(Unit) {
         if (!selectedMembers.contains(currentUserEmail)) {
             selectedMembers.add(currentUserEmail)
@@ -106,16 +121,8 @@ fun CreateGroup(
                 Button(
                     onClick = {
                         val email = memberEmail.trim()
-                        if (isValidEmail(email))
-                        {
-                            if (email.isNotEmpty() && email != currentUserEmail && !selectedMembers.contains(email))
-                            {
-                                selectedMembers.add(email)
-                                memberEmail = ""
-                            }
-                        }else{
-                            Toast.makeText(context,"Enter a valid Email Address",Toast.LENGTH_SHORT).show()
-                        }
+                        if (isValidEmail(email)) viewModelFireStoreUpload.checkEmail(email)
+                        else Toast.makeText(context,"Enter a valid Email Address",Toast.LENGTH_SHORT).show()
                     },
                     enabled = memberEmail.trim().isNotEmpty() && !selectedMembers.contains(memberEmail.trim())
                 ) {
