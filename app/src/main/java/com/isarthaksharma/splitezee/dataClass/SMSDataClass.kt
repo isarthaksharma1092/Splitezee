@@ -1,8 +1,9 @@
 package com.isarthaksharma.splitezee.dataClass
 
 data class SMSDataClass(
-    val accountNumber: Int,
-    val balance: Int,
+    val accountNumber: String,
+    val totalBalance: String,
     val lastUpdated: Long,
-    val bankName: String
+    val bankName: String,
+    val availableBalance:String
 )

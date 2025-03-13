@@ -5,7 +5,6 @@ import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -37,6 +36,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
@@ -63,7 +63,7 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
         setContent {
             SplitezeeTheme {
                 MainScreen()
@@ -137,11 +137,11 @@ fun MainScreen() {
                             Color(0xFF33a68c),
                             Color(0xFF0b7fde)
                         ),
-                        start = androidx.compose.ui.geometry.Offset(
+                        start = Offset(
                             Float.POSITIVE_INFINITY,
                             0f
                         ),
-                        end = androidx.compose.ui.geometry.Offset(
+                        end = Offset(
                             0f,
                             Float.POSITIVE_INFINITY
                         )
@@ -338,7 +338,9 @@ fun NavigationPage(
                 )
             }
         ) {
-            FinancePage(modifier,navController)
+            FinancePage(
+                modifier = modifier
+            )
         }
     }
 }

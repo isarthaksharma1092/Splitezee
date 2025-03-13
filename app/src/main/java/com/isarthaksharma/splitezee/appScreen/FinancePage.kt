@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.PrivacyTip
@@ -30,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -44,14 +46,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.navigation.NavHostController
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.isarthaksharma.splitezee.R
 import com.isarthaksharma.splitezee.ui.uiComponents.CardDesign
+import com.isarthaksharma.splitezee.ui.uiComponents.convertLongToDate
+import com.isarthaksharma.splitezee.viewModel.ViewModelSMS
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @SuppressLint("ContextCastToActivity")
 @Composable
-fun FinancePage(modifier: Modifier,navController:NavHostController) {
+fun FinancePage(
+    viewModelSMS: ViewModelSMS = hiltViewModel(),
+    modifier: Modifier
+) {
+    val smsList by viewModelSMS.smsData.collectAsState()
     val configuration = LocalConfiguration.current
     val context = LocalContext.current
     val isTablet = configuration.screenWidthDp >= 600
@@ -115,15 +126,15 @@ fun FinancePage(modifier: Modifier,navController:NavHostController) {
         // LazyVerticalGrid to show the cards
         LazyVerticalGrid(
             columns = if (isTablet) GridCells.Fixed(2) else GridCells.Fixed(1),
-            modifier = Modifier.padding(horizontal = 10.dp),
+            modifier = Modifier.weight(.1f),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(10) {
+            items(smsList) {sms->
                 CardDesign(
-                    availableBalance = 1234.0,
-                    lastUpdated = "02/03/2023",
-                    accountNumber = "xxx1234",
-                    bankName = "BOB",
+                    availableBalance = sms.totalBalance,
+                    lastUpdated = convertLongToDate(sms.lastUpdated),
+                    accountNumber = sms.accountNumber,
+                    bankName = sms.bankName,
                     bankLogo = R.drawable.icon_bob
                 )
             }
@@ -164,4 +175,10 @@ fun openAppSettings(context: Context) {
         data = Uri.fromParts("package", context.packageName, null)
     }
     context.startActivity(intent)
+}
+
+fun convertLongToDate(time: Long): String {
+    val date = Date(time) // Convert milliseconds to Date
+    val format = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()) // Customize format
+    return format.format(date)
 }

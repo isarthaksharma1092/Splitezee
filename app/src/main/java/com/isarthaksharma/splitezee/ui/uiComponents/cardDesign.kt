@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun CardDesign(
-    availableBalance: Double,
+    availableBalance: String,
     lastUpdated: String,
     accountNumber: String,
     bankName: String,

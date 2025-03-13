@@ -7,8 +7,6 @@ import android.util.Log
 
 class RepositorySyncing @Inject constructor(private val firestore: FirebaseFirestore) {
 
-
-
     suspend fun createGroup(groupName: String, createdByEmail: String, members: List<String>): Result<String> {
         val groupId = firestore.collection("groups").document().id
         val groupData = hashMapOf(
