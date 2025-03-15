@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -131,7 +129,7 @@ fun FinancePage(
         ) {
             items(smsList) {sms->
                 CardDesign(
-                    availableBalance = sms.totalBalance,
+                    availableBalance = if(sms.totalBalance != "N/A")sms.totalBalance else sms.availableBalance,
                     lastUpdated = convertLongToDate(sms.lastUpdated),
                     accountNumber = sms.accountNumber,
                     bankName = sms.bankName,
@@ -140,11 +138,7 @@ fun FinancePage(
             }
         }
 
-        Spacer(
-            modifier = Modifier
-                .fillMaxHeight()
-                .weight(.1f)
-        )
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -179,6 +173,6 @@ fun openAppSettings(context: Context) {
 
 fun convertLongToDate(time: Long): String {
     val date = Date(time) // Convert milliseconds to Date
-    val format = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()) // Customize format
+    val format = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
     return format.format(date)
 }

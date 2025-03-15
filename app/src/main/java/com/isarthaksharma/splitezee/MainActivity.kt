@@ -47,6 +47,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.isarthaksharma.splitezee.appScreen.FinancePage
+import com.isarthaksharma.splitezee.appScreen.GroupDetailsPage
 import com.isarthaksharma.splitezee.appScreen.GroupPage
 import com.isarthaksharma.splitezee.appScreen.HomePage
 import com.isarthaksharma.splitezee.appScreen.LoginPage
@@ -319,7 +320,12 @@ fun NavigationPage(
             }
         ) {
             onBottomBarVisibilityChange(true)
-            GroupPage(modifier)
+            GroupPage(
+                navController,
+                modifier,
+            ){
+                navController.navigate(NavigationUtility.GroupDetailsPage)
+            }
         }
 
         // Finance Page
@@ -338,9 +344,27 @@ fun NavigationPage(
                 )
             }
         ) {
-            FinancePage(
-                modifier = modifier
-            )
+            onBottomBarVisibilityChange(true)
+            FinancePage(modifier = modifier)
+        }
+
+        composable(
+            route = NavigationUtility.GroupDetailsPage,
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(durationMillis = 300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(durationMillis = 300)
+                )
+            }
+        ){
+            onBottomBarVisibilityChange(false)
+            GroupDetailsPage()
         }
     }
 }

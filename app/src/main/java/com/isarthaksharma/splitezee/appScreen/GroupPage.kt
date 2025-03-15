@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.isarthaksharma.splitezee.R
 import com.isarthaksharma.splitezee.ui.uiComponents.CreateGroup
 import com.isarthaksharma.splitezee.ui.uiComponents.GroupItem
@@ -38,8 +39,10 @@ import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDB
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GroupPage(
+    navController:NavController,
     modifier: Modifier,
-    viewModelGroupDB: ViewModelGroupDB = hiltViewModel()
+    viewModelGroupDB: ViewModelGroupDB = hiltViewModel(),
+    groupDetailsPage: () -> Unit
 ) {
 //    val context = LocalContext.current
     var isGroupSheetOpen by rememberSaveable { mutableStateOf(false) }
@@ -79,7 +82,7 @@ fun GroupPage(
                         it.groupMembers,
                         totalExpense = 0.0,
                         personalBalance = 0.0
-                    )
+                    ) { groupDetailsPage() }
                 }
             }
         }

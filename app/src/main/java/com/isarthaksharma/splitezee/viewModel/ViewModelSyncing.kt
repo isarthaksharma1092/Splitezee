@@ -58,25 +58,5 @@ package com.isarthaksharma.splitezee.viewModel
 //            }
 //    }
 //
-//    fun createGroup(groupName: String, members: List<String>) {
-//        val userEmail = FirebaseAuth.getInstance().currentUser?.email ?: return
-//        val groupId = firestore.collection("groups").document().id
 //
-//        val groupData = hashMapOf(
-//            "groupId" to groupId,
-//            "groupName" to groupName,
-//            "createdBy" to userEmail,
-//            "members" to members + userEmail, // Add creator to members list
-//            "totalAmount" to 0.0
-//        )
-//
-//        viewModelScope.launch {
-//            try {
-//                firestore.collection("groups").document(groupId).set(groupData)
-//                _groupCreationStatus.value = "Group created successfully!"
-//            } catch (e: Exception) {
-//                _groupCreationStatus.value = "Error creating group: ${e.message}"
-//            }
-//        }
-//    }
 //}

@@ -171,6 +171,7 @@ fun CreateGroup(
                                 groupCreationData = System.currentTimeMillis()
                             )
                             viewModelGroupDB.createGroup(groupDB)
+                            viewModelFireStoreUpload.groups
                             onDismiss()
                         }
                         else Toast.makeText(context, "Add at least one member", Toast.LENGTH_SHORT).show()

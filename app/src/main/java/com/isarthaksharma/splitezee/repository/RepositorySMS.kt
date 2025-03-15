@@ -21,8 +21,8 @@ class RepositorySMS @Inject constructor(
     )
 
     private val balancePatterns = listOf(
-        Regex("Total Bal: Rs\\.([0-9,.]+)"),
-        Regex("Balance\\s*Rs\\.([.]+[0-9]+)"),
+        Regex("Total Bal:Rs\\.([0-9,.]+)"),
+        Regex("Balance\\s*Rs\\.([0-9,.]+)"),
         Regex("Available Balance:\\s*Rs\\.([0-9,.]+)")
     )
 

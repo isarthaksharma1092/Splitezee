@@ -10,7 +10,7 @@ class RepositoryFireStoreUpload @Inject constructor(private val firestore: Fireb
 
     suspend fun checkIfEmailExists(email: String): Boolean {
         return try {
-            val querySnapshot = firestore.collection("AppUsers")
+            val querySnapshot = firestore.collection("users")
                 .whereEqualTo("email", email)
                 .limit(1)
                 .get()
@@ -33,6 +33,25 @@ class RepositoryFireStoreUpload @Inject constructor(private val firestore: Fireb
             expenseRef.set(expense.copy(firestoreExpenseId = expenseRef.id)).await()
         } catch (e: Exception) {
             Log.e("Firestore", "Error saving expense: ${e.message}")
+        }
+    }
+
+    suspend fun createGroup(groupName: String, createdByEmail: String, members: List<String>): Result<String> {
+        val groupId = firestore.collection("groups").document().id
+        val groupData = hashMapOf(
+            "groupId" to groupId,
+            "groupName" to groupName,
+            "createdBy" to createdByEmail,
+            "members" to members,
+            "totalAmount" to 0.0
+        )
+
+        return try {
+            firestore.collection("groups").document(groupId).set(groupData).await()
+            Result.success("Group created successfully!")
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error creating group: ${e.message}")
+            Result.failure(e) // Return failure instead of throwing
         }
     }
 }

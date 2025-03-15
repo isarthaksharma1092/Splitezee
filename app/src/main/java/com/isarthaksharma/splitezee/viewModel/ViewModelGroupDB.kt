@@ -1,5 +1,7 @@
 package com.isarthaksharma.splitezee.viewModel
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDataClass
@@ -12,8 +14,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ViewModelGroupDB @Inject constructor(private val repositoryGroupDB: RepositoryGroupDB) :
-    ViewModel() {
+class ViewModelGroupDB @Inject constructor(private val repositoryGroupDB: RepositoryGroupDB) : ViewModel() {
+
+    private val _selectedGroup = MutableLiveData<GroupDataClass?>()
+    val selectedGroup: LiveData<GroupDataClass?> = _selectedGroup
+
+    fun setSelectedGroup(group: GroupDataClass) {
+        _selectedGroup.value = group
+    }
+
     private var _group = MutableStateFlow<List<GroupDataClass>>(emptyList())
     val group: StateFlow<List<GroupDataClass>> = _group
 

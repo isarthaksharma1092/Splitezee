@@ -29,6 +29,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDataClass
+import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDB
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 @SuppressLint("DefaultLocale")
 @Composable
@@ -37,16 +42,18 @@ fun GroupItem(
     groupAdmin: String,
     groupMembers: List<String>,
     totalExpense: Double,
-    personalBalance: Double
+    personalBalance: Double,
+    groupDetails:()->Unit
 ) {
-    val context = LocalContext.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-            .clickable { Toast.makeText(context, "Clicked $groupName", Toast.LENGTH_SHORT).show() }
-            .shadow(6.dp, RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            .shadow(6.dp, RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 10.dp)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+        onClick = {
+            groupDetails()
+        }
     ) {
         Column(
             modifier = Modifier
@@ -72,15 +79,6 @@ fun GroupItem(
                     Text(text = "${groupMembers.size}", fontWeight = FontWeight.SemiBold)
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Admin & Total Spent Info
-            Text(
-                text = "Admin: $groupAdmin",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray
-            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
