@@ -6,10 +6,12 @@ plugins {
     id("com.google.dagger.hilt.android")
     kotlin("plugin.serialization") version "2.0.21"
     id("com.google.gms.google-services")
+    id("com.google.relay")
 }
 android {
     namespace = "com.isarthaksharma.splitezee"
     compileSdk = 35
+
 
     defaultConfig {
         applicationId = "com.isarthaksharma.splitezee"
@@ -64,7 +66,7 @@ dependencies {
     // Material UI & lifecycle
     implementation("androidx.compose.material3:material3:1.3.1")
     implementation("androidx.compose.material3:material3-window-size-class:1.3.1")
-    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.4.0-alpha09")
+    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.4.0-alpha10")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     // Coroutines
@@ -91,7 +93,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.8.8")
+    implementation("androidx.navigation:navigation-compose:2.8.9")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
@@ -102,8 +104,8 @@ dependencies {
 //    implementation ("com.google.android.gms:play-services:24.0.0")
 
     // Credential Manager
-    implementation("androidx.credentials:credentials:1.5.0-rc01")
-    implementation("androidx.credentials:credentials-play-services-auth:1.5.0-rc01")
+    implementation("androidx.credentials:credentials:1.5.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
     implementation ("com.google.android.gms:play-services-auth:21.3.0")
 
