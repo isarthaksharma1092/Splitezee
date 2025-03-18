@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -32,6 +34,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -49,17 +52,23 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.isarthaksharma.splitezee.R
 import com.isarthaksharma.splitezee.ui.uiComponents.AnimatedLiquidFAB
+import com.isarthaksharma.splitezee.ui.uiComponents.ExpenseShowCard
+import com.isarthaksharma.splitezee.viewModel.ViewModelPersonalDB
 
-@Preview(showSystemUi = true)
+//@Preview(showSystemUi = true)
 @OptIn(
     ExperimentalMaterial3ExpressiveApi::class,
     ExperimentalMaterial3Api::class,
     ExperimentalLayoutApi::class
 )
 @Composable
-fun GroupDetailsPage() {
+fun GroupDetailsPage(
+    viewModelPersonalDB: ViewModelPersonalDB = hiltViewModel(),
+) {
+    val expenses by viewModelPersonalDB.expenses.collectAsState()
     data class GroupMember(
         val name: String,
         val email: String
@@ -76,13 +85,13 @@ fun GroupDetailsPage() {
     val context = LocalContext.current
     var isEditSheetOpen by rememberSaveable { mutableStateOf(false) }
     val cardColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.2f)
-
+    val color:Color =  MaterialTheme.colorScheme.onTertiaryContainer
     // ~~~~~ UI
     Box {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(colors = listOf(Color(0xFF4A148C), Color(0xFF880E4F))))
+                .background(Brush.verticalGradient(colors = listOf(Color(0xFF027506),Color(0xFF000000))))
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 // ******** Header
@@ -200,17 +209,20 @@ fun GroupDetailsPage() {
                 }
             }
             // Other content
-            Box(modifier = Modifier.padding(vertical = 20.dp, horizontal = 10.dp)) {
-                Text(
-                    "Group created on : 10/20/2025",
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Start,
-                    color = MaterialTheme.colorScheme.background,
-                    style = MaterialTheme.typography.titleSmallEmphasized,
-                    fontFamily = FontFamily(Font(R.font.doto))
-                )
+            // **Expense List**
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(expenses) { expense ->
+                    ExpenseShowCard(
+                        expense.expenseName,
+                        expense.expenseDate,
+                        expense.expenseAmt,
+                        expense.expenseMsg,
+                        expense.expenseCurrency
+                    )
+                }
             }
         }
 

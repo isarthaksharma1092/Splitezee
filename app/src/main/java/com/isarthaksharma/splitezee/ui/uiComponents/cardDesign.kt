@@ -1,5 +1,6 @@
 package com.isarthaksharma.splitezee.ui.uiComponents
 
+import com.isarthaksharma.splitezee.R
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -73,7 +74,7 @@ fun CardDesign(
                 }
 
                 Image(
-                    painter = painterResource(bankLogo),
+                    painter = painterResource(R.drawable.wireless_card),
                     contentDescription = "Bank Logo",
                     modifier = Modifier.size(40.dp)
                 )

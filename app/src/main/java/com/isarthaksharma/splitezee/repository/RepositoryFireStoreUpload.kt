@@ -8,6 +8,19 @@ import javax.inject.Inject
 
 class RepositoryFireStoreUpload @Inject constructor(private val firestore: FirebaseFirestore){
 
+    suspend fun getExpensesFromFireStore(userId: String): List<PersonalDataClass> {
+        return try {
+            val snapshot = firestore.collection("users")
+                .document(userId)
+                .collection("expenses")
+                .get()
+                .await()
+
+            snapshot.documents.mapNotNull { it.toObject(PersonalDataClass::class.java) }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
     suspend fun checkIfEmailExists(email: String): Boolean {
         return try {
             val querySnapshot = firestore.collection("users")

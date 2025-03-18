@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,7 +36,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -81,6 +84,15 @@ fun MainScreen() {
     var showBottomBar by rememberSaveable { mutableStateOf(false) }
     var selectedBottomNavBar by rememberSaveable { mutableStateOf("") }
 
+    val gradientColors = listOf(
+        Color(0xFF38DF57),
+        Color(0xFF04A9FB),
+        Color.Black,
+        Color.Black,
+        Color.Black
+    )
+
+
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
@@ -88,11 +100,21 @@ fun MainScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                        .background(MaterialTheme.colorScheme.surface)
-
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.White.copy(alpha = 0.2f),  // Light frosted effect
+                                    Color.White.copy(alpha = 0.05f) // More transparency at bottom
+                                )
+                            )
+                        )
+                        .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(24.dp)) // Subtle border effect
                 ) {
                     selectedBottomNavBar = "Personal"
-                    NavigationBar {
+                    NavigationBar(
+                        containerColor = Color.Transparent, // Removes Material default color
+                        tonalElevation = 0.dp // Removes shadow effects from MaterialTheme
+                    ) {
                         bottomItems().forEachIndexed { index, item ->
                             NavigationBarItem(
                                 selected = selectedItem == index,
@@ -100,7 +122,7 @@ fun MainScreen() {
                                     if (selectedItem != index) {
                                         selectedItem = index
                                         selectedBottomNavBar = item.title
-                                        navController.navigate(item.label){
+                                        navController.navigate(item.label) {
                                             popUpTo(0) { inclusive = true }
                                             launchSingleTop = true
                                         }
@@ -109,14 +131,19 @@ fun MainScreen() {
                                 icon = {
                                     Icon(
                                         if (index == selectedItem) item.selectedIcon else item.unselectedIcon,
-                                        contentDescription = item.title
+                                        contentDescription = item.title,
+                                        tint = if (selectedItem == index) Color.Black else Color.Gray
                                     )
                                 },
                                 label = {
                                     Text(
                                         text = item.title,
                                         style = MaterialTheme.typography.titleSmall,
-                                        color = if (selectedItem == index) MaterialTheme.colorScheme.onBackground else Color.Gray
+                                        color = if (selectedItem == index) {
+                                            if (isSystemInDarkTheme()) Color.Black else Color.White
+                                        } else {
+                                            Color.Gray
+                                        }
                                     )
                                 }
                             )
@@ -130,24 +157,7 @@ fun MainScreen() {
         NavigationPage(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFF99e365),
-                            Color(0xFF33a68c),
-                            Color(0xFF33a68c),
-                            Color(0xFF0b7fde)
-                        ),
-                        start = Offset(
-                            Float.POSITIVE_INFINITY,
-                            0f
-                        ),
-                        end = Offset(
-                            0f,
-                            Float.POSITIVE_INFINITY
-                        )
-                    )
-                )
+                .background(Brush.verticalGradient(colors = gradientColors))
                 .padding(top = 40.dp, start = 10.dp, end = 10.dp, bottom = 100.dp),
             navController
         ) { isBottomBarVisible ->
@@ -178,12 +188,12 @@ fun bottomItems(): List<BottomDataClass> {
             selectedIcon = Icons.Filled.Person,
             unselectedIcon = Icons.Outlined.Person
         ),
-        BottomDataClass(
-            title = "Group",
-            label = "GroupPage",
-            selectedIcon = Icons.Filled.Groups,
-            unselectedIcon = Icons.Outlined.Groups
-        ),
+//        BottomDataClass(
+//            title = "Group",
+//            label = "GroupPage",
+//            selectedIcon = Icons.Filled.Groups,
+//            unselectedIcon = Icons.Outlined.Groups
+//        ),
         BottomDataClass(
             title = "Finance",
             label = "FinancePage",

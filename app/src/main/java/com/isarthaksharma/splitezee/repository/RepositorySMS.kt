@@ -1,7 +1,11 @@
 package com.isarthaksharma.splitezee.repository
 
 import android.content.Context
+import android.content.pm.PackageManager
+import android.database.Cursor
 import android.net.Uri
+import android.util.Log
+import androidx.core.content.ContextCompat
 import com.isarthaksharma.splitezee.dataClass.SMSDataClass
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -13,30 +17,56 @@ class RepositorySMS @Inject constructor(
 ) {
     private val bankMessages = mutableMapOf<String, SMSDataClass>()
 
-    // Different regex patterns for various bank SMS formats
-    private val accountPatterns = listOf(
-        Regex("A/c\\s*(\\.\\.\\.\\d+|\\d+)"), // Common format
-        Regex("Account\\s*Number:\\s*(\\d+)"), // Alternative format
-        Regex("Acc\\s*:\\s*(\\d+)") // Shorter format
+    // Bank configurations
+    private val bankConfigurations = mapOf(
+        "BOB" to BankConfig(
+            senderIds = listOf("BOB", "BankofBaroda"),
+            balancePatterns = listOf(
+                Regex("Total Bal:Rs\\.([0-9,.]+)"),
+                Regex("Available Balance:\\s*Rs\\.([0-9,.]+)")
+            ),
+            accountPatterns = listOf(
+                Regex("A/c\\s*(\\.\\.\\.\\d+|\\d+)"),
+                Regex("Account\\s*Number:\\s*(\\d+)")
+            ),
+            bankNamePatterns = listOf(Regex("Bank of Baroda"))
+        ),
+        "SBI" to BankConfig(
+            senderIds = listOf("SBI", "SBIBANK"),
+            balancePatterns = listOf(
+                Regex("Your a/c no XXXXXXXXXXXX(\\d+) has an available balance of INR ([0-9,.]+)"),
+                Regex("Dear Customer, Your Account XXXXXXXXXXXX(\\d+) has a balance of INR ([0-9,.]+) as on")
+            ),
+            accountPatterns = listOf(
+                Regex("a/c no XXXXXXXXXXXX(\\d+)"),
+                Regex("Account XXXXXXXXXXXX(\\d+)")
+            ),
+            bankNamePatterns = listOf(Regex("STATE BANK OF INDIA"), Regex("SBI"))
+        ),
     )
 
-    private val balancePatterns = listOf(
-        Regex("Total Bal:Rs\\.([0-9,.]+)"),
-        Regex("Balance\\s*Rs\\.([0-9,.]+)"),
-        Regex("Available Balance:\\s*Rs\\.([0-9,.]+)")
+    private data class BankConfig(
+        val senderIds: List<String>,
+        val balancePatterns: List<Regex>,
+        val accountPatterns: List<Regex>,
+        val bankNamePatterns: List<Regex>
     )
-
-    private val dateRegex = Regex("\\((\\d{2}-\\d{2}-\\d{4} \\d{2}:\\d{2}:\\d{2})\\)")
-
-    private val bankKeywords = listOf("bank", "A/c", "Acc", "Balance", "credited", "debited")
 
     suspend fun SMSCheck(): List<SMSDataClass> = withContext(Dispatchers.IO) {
-        val cursor = context.contentResolver.query(
+        // ✅ **Check if permission is granted before querying**
+        if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.READ_SMS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            Log.e("RepositorySMS", "SMS permission not granted. Cannot fetch SMS data.")
+            return@withContext emptyList()
+        }
+
+        val cursor: Cursor? = context.contentResolver.query(
             Uri.parse("content://sms/inbox"),
             arrayOf("_id", "address", "body", "date"),
             null,
             null,
-            "date DESC" // Sort by latest date
+            "date DESC"
         )
 
         cursor?.use {
@@ -45,20 +75,31 @@ class RepositorySMS @Inject constructor(
                 val messageBody = it.getString(it.getColumnIndexOrThrow("body"))
                 val date = it.getLong(it.getColumnIndexOrThrow("date"))
 
-                if (bankKeywords.any { keyword -> messageBody.contains(keyword, ignoreCase = true) }) {
-                    val extractedData = SMSDataClass(
-                        bankName = sender,
-                        accountNumber = extractUsingPatterns(accountPatterns, messageBody),
-                        totalBalance = extractUsingPatterns(balancePatterns, messageBody),
-                        availableBalance = extractUsingPatterns(balancePatterns, messageBody),
-                        lastUpdated = date
-                    )
+                for ((bankIdentifier, config) in bankConfigurations) {
+                    if (config.senderIds.any { id -> sender.contains(id, ignoreCase = true) } ||
+                        config.bankNamePatterns.any { pattern -> pattern.containsMatchIn(messageBody) }
+                    ) {
+                        val bankName = config.bankNamePatterns.firstOrNull { pattern -> pattern.containsMatchIn(messageBody) }?.find(messageBody)?.value ?: bankIdentifier
+                        val accountNumber = extractUsingPatterns(config.accountPatterns, messageBody)
+                        val totalBalance = extractUsingPatterns(config.balancePatterns, messageBody)
+                        val availableBalance = extractUsingPatterns(config.balancePatterns, messageBody)
 
-                    val accountNumber = extractedData.accountNumber
+                        // ✅ **Ensure we don’t overwrite a correct value with "N/A"**
+                        val extractedData = SMSDataClass(
+                            bankName = bankName,
+                            accountNumber = if (accountNumber != "N/A") accountNumber else bankMessages[sender]?.accountNumber ?: "N/A",
+                            totalBalance = if (totalBalance != "N/A") totalBalance else bankMessages[sender]?.totalBalance ?: "N/A",
+                            availableBalance = if (availableBalance != "N/A") availableBalance else bankMessages[sender]?.availableBalance ?: "N/A",
+                            lastUpdated = date
+                        )
 
-                    // Store only the latest message per unique bank account
-                    if (!bankMessages.containsKey(accountNumber) || date > bankMessages[accountNumber]!!.lastUpdated) {
-                        bankMessages[accountNumber] = extractedData
+                        // ✅ **Ensure latest data is used**
+                        val key = extractedData.accountNumber.takeIf { it != "N/A" } ?: sender
+                        if (!bankMessages.containsKey(key) || date > bankMessages[key]!!.lastUpdated) {
+                            bankMessages[key] = extractedData
+                        }
+
+                        break // ✅ **Once matched, break to avoid unnecessary checks**
                     }
                 }
             }
@@ -71,7 +112,7 @@ class RepositorySMS @Inject constructor(
         for (pattern in patterns) {
             val match = pattern.find(text)
             if (match != null) {
-                return match.groupValues[1]
+                return match.groupValues[1].replace(",", "") // Remove commas
             }
         }
         return "N/A"

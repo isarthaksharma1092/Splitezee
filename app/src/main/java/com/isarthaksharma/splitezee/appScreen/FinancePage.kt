@@ -29,13 +29,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
@@ -65,79 +69,109 @@ fun FinancePage(
     val context = LocalContext.current
     val isTablet = configuration.screenWidthDp >= 600
 
-    // Track permission request attempts
+    // Track permission attempts
     var permissionRequestCount by rememberSaveable { mutableIntStateOf(0) }
+    var showPermissionDialog by remember { mutableStateOf(false) }
 
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
             Toast.makeText(context, "Permission granted", Toast.LENGTH_SHORT).show()
+            viewModelSMS.smsData
         } else {
-            // Increment counter when permission is denied
             permissionRequestCount++
 
+            // If denied more than twice, open settings
             if (permissionRequestCount > 2) {
                 openAppSettings(context)
+            } else {
+                showPermissionDialog = true
             }
         }
     }
 
-    LaunchedEffect(Unit) {
+    // ✅ **Corrected Permission Handling**
+    LaunchedEffect(Unit) { // Runs when FinancePage is entered
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_SMS)
             != PackageManager.PERMISSION_GRANTED
         ) {
             requestPermissionLauncher.launch(Manifest.permission.READ_SMS)
+        } else {
+            viewModelSMS.smsData // ✅ Fetch SMS if permission is already granted
         }
     }
 
     Column(modifier) {
-        // Heading and Information Section
-        Box {
-            Row(
+        // ✅ **Show UI only when permission is granted**
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_SMS)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            Box {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Finance",
+                        style = MaterialTheme.typography.displaySmallEmphasized,
+                        fontFamily = FontFamily(Font(R.font.nabla_heading, FontWeight.ExtraBold)),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        textAlign = TextAlign.Justify,
+                        modifier = Modifier.padding(vertical = 10.dp)
+                    )
+                    Icon(
+                        Icons.Outlined.Info,
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        contentDescription = null,
+                        modifier = Modifier.clickable(
+                            enabled = true,
+                            onClick = {
+                                Toast.makeText(context, "Bank Of Baroda Only Supported Bank Right Now", Toast.LENGTH_LONG).show()
+                            }
+                        )
+                    )
+                }
+            }
+
+            LazyVerticalGrid(
+                columns = if (isTablet) GridCells.Fixed(2) else GridCells.Fixed(1),
+                modifier = Modifier.weight(.1f),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(smsList) { sms ->
+                    if (sms.totalBalance != "N/A" || sms.availableBalance != "N/A") {
+                        CardDesign(
+                            availableBalance = if (sms.totalBalance != "N/A") sms.totalBalance else sms.availableBalance,
+                            lastUpdated = convertLongToDate(sms.lastUpdated),
+                            accountNumber = sms.accountNumber,
+                            bankName = sms.bankName,
+                            bankLogo = R.drawable.icon_bob
+                        )
+                    }
+                }
+            }
+        } else {
+            // ✅ **Show a message if permission is denied**
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Finance",
-                    style = MaterialTheme.typography.displaySmallEmphasized,
-                    fontFamily = FontFamily(Font(R.font.doto, FontWeight.ExtraBold)),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    textAlign = TextAlign.Justify,
-                    modifier = Modifier.padding(vertical = 10.dp)
+                    text = "We need SMS permission to fetch financial data securely.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center
                 )
-                Icon(
-                    Icons.Outlined.Info,
-                    tint = MaterialTheme.colorScheme.primary,
-                    contentDescription = null,
-                    modifier = Modifier.clickable(
-                        enabled = true,
-                        onClick = {
-                            Toast.makeText(context, "Information Pending", Toast.LENGTH_LONG).show()
-                        }
-                    )
-                )
+                androidx.compose.material3.Button(
+                    onClick = { requestPermissionLauncher.launch(Manifest.permission.READ_SMS) },
+                    modifier = Modifier.padding(top = 16.dp)
+                ) {
+                    Text("Grant Permission")
+                }
             }
         }
-
-        // LazyVerticalGrid to show the cards
-        LazyVerticalGrid(
-            columns = if (isTablet) GridCells.Fixed(2) else GridCells.Fixed(1),
-            modifier = Modifier.weight(.1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(smsList) {sms->
-                CardDesign(
-                    availableBalance = if(sms.totalBalance != "N/A")sms.totalBalance else sms.availableBalance,
-                    lastUpdated = convertLongToDate(sms.lastUpdated),
-                    accountNumber = sms.accountNumber,
-                    bankName = sms.bankName,
-                    bankLogo = R.drawable.icon_bob
-                )
-            }
-        }
-
 
         Row(
             modifier = Modifier
@@ -155,15 +189,37 @@ fun FinancePage(
                 text = "We do not upload your SMS data anywhere. Your personal information stays on your device and is not shared anywhere.",
                 style = MaterialTheme.typography.titleSmallEmphasized,
                 fontFamily = FontFamily(Font(R.font.doto, FontWeight.ExtraBold)),
-                color = MaterialTheme.colorScheme.onBackground,
+                color = Color.White,
                 textAlign = TextAlign.Unspecified,
                 modifier = Modifier.padding(horizontal = 5.dp)
             )
         }
     }
+
+    // ✅ **Permission Explanation Dialog**
+    if (showPermissionDialog) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showPermissionDialog = false },
+            title = { Text("SMS Permission Needed") },
+            text = { Text("We need SMS access to read bank messages securely. Your data is never uploaded.") },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    showPermissionDialog = false
+                    requestPermissionLauncher.launch(Manifest.permission.READ_SMS)
+                }) {
+                    Text("Try Again")
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { showPermissionDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
-// open app settings
+// ✅ **Function to Open App Settings if Permission is Denied**
 fun openAppSettings(context: Context) {
     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
         data = Uri.fromParts("package", context.packageName, null)
@@ -171,8 +227,9 @@ fun openAppSettings(context: Context) {
     context.startActivity(intent)
 }
 
+// ✅ **Convert Timestamp to Date**
 fun convertLongToDate(time: Long): String {
-    val date = Date(time) // Convert milliseconds to Date
+    val date = Date(time)
     val format = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
     return format.format(date)
 }

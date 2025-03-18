@@ -25,9 +25,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.isarthaksharma.splitezee.R
 import com.isarthaksharma.splitezee.localStorage.dataClass.PersonalDataClass
 import com.isarthaksharma.splitezee.viewModel.ViewModelFireStoreUpload
 import com.isarthaksharma.splitezee.viewModel.ViewModelPersonalDB
@@ -71,7 +74,9 @@ fun AddExpense(
             OutlinedTextField(
                 value = expenseState,
                 onValueChange = { expenseState = it },
-                label = { Text("Expense Name") },
+                label = { Text("Expense Name",fontFamily = FontFamily(Font(R.font.lumpbump)))},
+
+
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(5.dp),
@@ -81,7 +86,7 @@ fun AddExpense(
             OutlinedTextField(
                 value = amountState,
                 onValueChange = { amountState = it },
-                label = { Text("Amount") },
+                label = { Text("Amount",fontFamily = FontFamily(Font(R.font.lumpbump))) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -92,7 +97,7 @@ fun AddExpense(
             OutlinedTextField(
                 value = msgState,
                 onValueChange = { msgState = it },
-                label = { Text("Message (Optional)") },
+                label = { Text("Message (Optional)",fontFamily = FontFamily(Font(R.font.lumpbump))) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(5.dp),
@@ -108,7 +113,7 @@ fun AddExpense(
                 modifier = Modifier.padding(16.dp),
             ) {
                 val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(selectedDate.longValue))
-                Text(text = formattedDate)
+                Text(text = formattedDate,fontFamily = FontFamily(Font(R.font.lumpbump)))
             }
 
             // Expense Adding
@@ -140,7 +145,7 @@ fun AddExpense(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 30.dp),
             ) {
-                Text("Add Expense")
+                Text("Add Expense",fontFamily = FontFamily(Font(R.font.lumpbump)))
             }
         }
     }

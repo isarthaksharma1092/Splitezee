@@ -7,6 +7,7 @@ plugins {
     kotlin("plugin.serialization") version "2.0.21"
     id("com.google.gms.google-services")
     id("com.google.relay")
+
 }
 android {
     namespace = "com.isarthaksharma.splitezee"
@@ -31,6 +32,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -109,6 +111,4 @@ dependencies {
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
     implementation ("com.google.android.gms:play-services-auth:21.3.0")
 
-    // blur Effect
-//    implementation 'io.alterac.blurkit:blurkit:1.1.0'
 }

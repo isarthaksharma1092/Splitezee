@@ -1,6 +1,7 @@
 package com.isarthaksharma.splitezee.appScreen
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -70,6 +71,8 @@ fun HomePage(
     val sheetState = rememberModalBottomSheetState()
     var isPersonalSheetOpen by rememberSaveable { mutableStateOf(false) }
 
+    val cardColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.3f)
+
     Box(
         modifier = modifier
     ) {
@@ -85,7 +88,7 @@ fun HomePage(
                 Text(
                     text = "Hi ${(userProfile?.userName)?.substringBefore(" ")},",
                     style = MaterialTheme.typography.displaySmallEmphasized,
-                    fontFamily = FontFamily(Font(R.font.doto, FontWeight.ExtraBold)),
+                    fontFamily = FontFamily(Font(R.font.nabla_heading, FontWeight.Bold)),
                     color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Justify,
                     modifier = Modifier.padding(vertical = 10.dp)
@@ -105,7 +108,7 @@ fun HomePage(
             // **Total Spent Banner**
             Card(
                 elevation = CardDefaults.cardElevation(70.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
+                colors = CardDefaults.cardColors(containerColor = cardColor),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(180.dp)

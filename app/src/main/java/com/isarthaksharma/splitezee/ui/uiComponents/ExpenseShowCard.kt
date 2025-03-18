@@ -3,6 +3,7 @@ package com.isarthaksharma.splitezee.ui.uiComponents
 import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -41,12 +43,11 @@ fun ExpenseShowCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape = RoundedCornerShape(10.dp)),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer),
+        colors = CardDefaults.cardColors(containerColor = Color.White ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
             // Title and Date Section
             Row(
@@ -57,9 +58,9 @@ fun ExpenseShowCard(
             ) {
                 Text(
                     text = expense,
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    color = Color.Black,
                     style = MaterialTheme.typography.headlineSmall,
-                    fontFamily = FontFamily(Font(R.font.doto)),
+                    fontFamily = FontFamily(Font(R.font.roboto_flex, FontWeight.ExtraBold)),
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .weight(1f),
@@ -70,9 +71,9 @@ fun ExpenseShowCard(
 
                 Text(
                     text = convertLongToDate(expenseDate),
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    color = Color.Black,
                     style = MaterialTheme.typography.titleMedium,
-                    fontFamily = FontFamily(Font(R.font.doto)),
+                    fontFamily = FontFamily(Font(R.font.roboto_flex, FontWeight.Bold)),
                     modifier = Modifier.padding(horizontal = 2.dp)
                 )
             }
@@ -80,26 +81,26 @@ fun ExpenseShowCard(
             // Expense Amount Section
             Text(
                 text = "$expenseCurrency ${String.format("%.2f", expenseAmt)}",
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = Color.Black,
                 style = MaterialTheme.typography.titleLarge,
-                fontFamily = FontFamily(Font(R.font.doto, FontWeight.Bold)),
+                fontFamily = FontFamily(Font(R.font.roboto_flex)),
                 modifier = Modifier.padding(horizontal = 10.dp)
-            )
-
-            HorizontalDivider(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp)
-                    .border(BorderStroke(1.dp, MaterialTheme.colorScheme.primaryContainer)),
             )
 
             // Expense Message Section
             if (!expenseMsg.isNullOrBlank()) {
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp)
+                        .border(BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary)),
+                )
+
                 Text(
                     text = "Note : $expenseMsg",
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    color = Color.Black,
                     style = MaterialTheme.typography.titleMedium,
-                    fontFamily = FontFamily(Font(R.font.doto)),
+                    fontFamily = FontFamily(Font(R.font.roboto_flex)),
                     modifier = Modifier.fillMaxWidth()
                         .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
                 )
@@ -112,16 +113,4 @@ fun ExpenseShowCard(
 fun convertLongToDate(time: Long): String {
     val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     return format.format(Date(time))
-}
-
-@Preview(showSystemUi = true)
-@Composable
-fun ExpenseShowCardPreview() {
-    ExpenseShowCard(
-        expense = "Dinner with Friends",
-        expenseDate = System.currentTimeMillis(),
-        expenseAmt = 1299.50,
-        expenseMsg = "Had an amazing meal at XYZ restaurant!",
-        expenseCurrency = "$"
-    )
 }

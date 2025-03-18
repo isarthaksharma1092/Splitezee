@@ -9,8 +9,10 @@ import com.google.firebase.ktx.Firebase
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDataClass
 import com.isarthaksharma.splitezee.localStorage.dataClass.PersonalDataClass
 import com.isarthaksharma.splitezee.repository.RepositoryFireStoreUpload
+import com.isarthaksharma.splitezee.repository.RepositoryPersonalDB
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,10 +20,29 @@ import javax.inject.Inject
 @HiltViewModel
 class ViewModelFireStoreUpload @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val repositoryFireStoreUpload: RepositoryFireStoreUpload
+    private val repositoryFireStoreUpload: RepositoryFireStoreUpload,
+    private val repositoryPersonalDB:RepositoryPersonalDB
 ): ViewModel(
 
 ){
+    val localData: StateFlow<List<PersonalDataClass>> = localRepository.getAllExpenses().stateIn(
+        viewModelScope, SharingStarted.Lazily, emptyList()
+    )
+
+    fun syncDataIfNeeded(userId: String) {
+        viewModelScope.launch {
+            val localExpenses = localRepository.getAllExpensesOnce()
+
+            if (localExpenses.isEmpty()) {  // If local DB is empty
+                val firestoreData = remoteRepository.getExpensesFromFirestore(userId)
+
+                if (firestoreData.isNotEmpty()) {
+                    localRepository.insertExpenses(firestoreData) // Restore to RoomDB
+                }
+            }
+        }
+    }
+
     // User Exist Check
     private val _emailExists = MutableStateFlow<Boolean?>(null)
     val emailExists:StateFlow<Boolean?> = _emailExists
