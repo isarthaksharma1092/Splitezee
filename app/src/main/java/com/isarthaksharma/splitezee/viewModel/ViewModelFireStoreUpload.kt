@@ -25,19 +25,19 @@ class ViewModelFireStoreUpload @Inject constructor(
 ): ViewModel(
 
 ){
-    val localData: StateFlow<List<PersonalDataClass>> = localRepository.getAllExpenses().stateIn(
+    val localData: StateFlow<List<PersonalDataClass>> = repositoryPersonalDB.getAllExpenses().stateIn(
         viewModelScope, SharingStarted.Lazily, emptyList()
     )
 
     fun syncDataIfNeeded(userId: String) {
         viewModelScope.launch {
-            val localExpenses = localRepository.getAllExpensesOnce()
+            val localExpenses = repositoryPersonalDB.getAllExpensesOnce()
 
             if (localExpenses.isEmpty()) {  // If local DB is empty
                 val firestoreData = remoteRepository.getExpensesFromFirestore(userId)
 
                 if (firestoreData.isNotEmpty()) {
-                    localRepository.insertExpenses(firestoreData) // Restore to RoomDB
+                    repositoryPersonalDB.insertExpenses(firestoreData) // Restore to RoomDB
                 }
             }
         }
