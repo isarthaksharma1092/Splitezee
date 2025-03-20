@@ -5,10 +5,10 @@ import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
@@ -62,7 +63,7 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
+        enableEdgeToEdge()
         setContent {
             SplitezeeTheme {
                 MainScreen()
@@ -71,6 +72,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// ***************** Main UI *****************
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen() {
@@ -79,30 +81,28 @@ fun MainScreen() {
     var showBottomBar by rememberSaveable { mutableStateOf(false) }
     var selectedBottomNavBar by rememberSaveable { mutableStateOf("") }
 
+    // App Background Color
     val gradientColors = if (isSystemInDarkTheme()) {
         listOf(
-            Color(0xFFBBFCBE),
-            Color(0xFF86C8FC),
-            Color.Black,
-            Color.Black,
-            Color.Black,
-            Color.Black,
+            Color(0xFF56C2F2).copy(alpha = 0.4f),
+            Color(0xFF56C2F2).copy(alpha = 0.2f),
             Color.Black
         )
-    } else { listOf(
-            Color(0xFFBBFCBE),
-            Color(0xFF86C8FC),
+    } else {
+        listOf(
+            Color(0xFF56C2F2).copy(alpha = 0.4f),
+            Color(0xFF56C2F2).copy(alpha = 0.2f),
             Color.White,
-            Color.White,
-            Color.White,
-            Color.White,
-            Color.White
-        ) }
-    val colorInvert:Color = if (isSystemInDarkTheme()) { Color.Black }else{ Color.White }
+        )
+    }
 
-    Scaffold(
-        bottomBar = {
+    // Color Invert to Background Color
+    val colorInvert: Color = if (isSystemInDarkTheme()) { Color.White } else { Color.Black }
+
+    // Bottom NavBar
+    Scaffold(bottomBar = {
             if (showBottomBar) {
+                // Box Containing Bottom NavBar
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -110,27 +110,25 @@ fun MainScreen() {
                         .background(
                             Brush.verticalGradient(
                                 colors = listOf(
-                                    Color.White.copy(alpha = 0.2f),  // Light frosted effect
-                                    Color.White.copy(alpha = 0.05f) // More transparency at bottom
+                                    Color(0xFF58ACF1).copy(alpha = 0.2f),
+                                    Color(0xFF58ACF1).copy(alpha = 0.5f)
                                 )
                             )
                         )
-                        .border(
-                            1.dp,
-                            Color.White.copy(alpha = 0.3f),
-                            RoundedCornerShape(24.dp)
-                        )
+
                 ) {
                     selectedBottomNavBar = "Personal"
                     NavigationBar(
                         containerColor = Color.Transparent,
                         tonalElevation = 0.dp
                     ) {
+                        // Bottom NavBar Content
                         bottomItems().forEachIndexed { index, item ->
                             NavigationBarItem(
                                 selected = selectedItem == index,
-                                onClick = {
-                                    if (selectedItem != index) {
+
+                                onClick = { if (selectedItem != index)
+                                    {
                                         selectedItem = index
                                         selectedBottomNavBar = item.title
                                         navController.navigate(item.label) {
@@ -139,54 +137,67 @@ fun MainScreen() {
                                         }
                                     }
                                 },
+
                                 icon = {
                                     Icon(
                                         if (index == selectedItem) item.selectedIcon else item.unselectedIcon,
                                         contentDescription = item.title,
-                                        tint = if (selectedItem == index) Color.Black else Color.White
+                                        tint = if (selectedItem == index) colorInvert else Color.Gray
                                     )
                                 },
+
                                 label = {
                                     Text(
                                         text = item.title,
                                         style = MaterialTheme.typography.titleSmall,
                                         color = if (selectedItem == index) {
                                             colorInvert
-                                        } else { Color.Gray }
+                                        } else {
+                                            Color.Gray
+                                        }
                                     )
                                 }
+
                             )
                         }
                     }
                 }
             }
-        }
-    ) { _ ->
+        }) { _ ->
 
         NavigationPage(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(colors = gradientColors))
+                .background(
+                    Brush.verticalGradient(
+                        colors = gradientColors,
+                        startY = 200f,
+                        endY = 500f
+                    )
+                )
                 .padding(top = 40.dp, start = 10.dp, end = 10.dp, bottom = 100.dp),
             navController
         ) { isBottomBarVisible ->
             showBottomBar = isBottomBarVisible
         }
-        SetStatusBarColor()
+
+        SetTransparentStatusBar()
     }
 }
 
 // Setting the Status Bar for transparent Background
 @Composable
-fun SetStatusBarColor() {
+fun SetTransparentStatusBar() {
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars
+            window.statusBarColor = Color.Transparent.toArgb()
+            WindowCompat.setDecorFitsSystemWindows(window, false)
         }
     }
 }
+
 
 // Bottom Navigation Items
 fun bottomItems(): List<BottomDataClass> {

@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -53,9 +53,7 @@ import com.isarthaksharma.splitezee.R
 import com.isarthaksharma.splitezee.ui.uiComponents.CardDesign
 import com.isarthaksharma.splitezee.ui.uiComponents.convertLongToDate
 import com.isarthaksharma.splitezee.viewModel.ViewModelSMS
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @SuppressLint("ContextCastToActivity")
@@ -64,6 +62,8 @@ fun FinancePage(
     viewModelSMS: ViewModelSMS = hiltViewModel(),
     modifier: Modifier
 ) {
+    val colorInvert:Color = if (isSystemInDarkTheme()) { Color.White }else{ Color.Black }
+
     val smsList by viewModelSMS.smsData.collectAsState()
     val configuration = LocalConfiguration.current
     val context = LocalContext.current
@@ -189,7 +189,7 @@ fun FinancePage(
                 text = "We do not upload your SMS data anywhere. Your personal information stays on your device and is not shared anywhere.",
                 style = MaterialTheme.typography.titleSmallEmphasized,
                 fontFamily = FontFamily(Font(R.font.doto, FontWeight.ExtraBold)),
-                color = Color.White,
+                color = colorInvert,
                 textAlign = TextAlign.Unspecified,
                 modifier = Modifier.padding(horizontal = 5.dp)
             )
@@ -227,9 +227,9 @@ fun openAppSettings(context: Context) {
     context.startActivity(intent)
 }
 
-// ✅ **Convert Timestamp to Date**
-fun convertLongToDate(time: Long): String {
-    val date = Date(time)
-    val format = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-    return format.format(date)
-}
+//// ✅ **Convert Timestamp to Date**
+//fun convertLongToDate(time: Long): String {
+//    val date = Date(time)
+//    val format = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+//    return format.format(date)
+//}

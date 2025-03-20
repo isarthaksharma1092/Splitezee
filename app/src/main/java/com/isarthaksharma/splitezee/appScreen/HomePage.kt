@@ -1,7 +1,6 @@
 package com.isarthaksharma.splitezee.appScreen
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -71,15 +70,13 @@ fun HomePage(
     val sheetState = rememberModalBottomSheetState()
     var isPersonalSheetOpen by rememberSaveable { mutableStateOf(false) }
 
-    val cardColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.3f)
+    val cardColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
 
-    Box(
-        modifier = modifier
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // Header (Greeting + Profile Picture)
+//    val dismissState = rememberDismissState()
+    Box(modifier = modifier) {
+        Column(modifier = Modifier.fillMaxSize()) {
+
+            // ***************** Greeting + Profile Picture *****************
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -105,7 +102,7 @@ fun HomePage(
                 )
             }
 
-            // **Total Spent Banner**
+            // ***************** Total Spent Banner *****************
             Card(
                 elevation = CardDefaults.cardElevation(70.dp),
                 colors = CardDefaults.cardColors(containerColor = cardColor),
@@ -121,9 +118,10 @@ fun HomePage(
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceAround
                     ) {
-                        // **Total Spending Column**
+
+                        // ~~ Total Spending Column
                         Column(
                             modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.SpaceEvenly,
@@ -143,7 +141,7 @@ fun HomePage(
                             )
                         }
 
-                        // **Vertical Divider**
+                        // ~~ Vertical Divider
                         VerticalDivider(
                             modifier = Modifier
                                 .fillMaxHeight()
@@ -151,10 +149,10 @@ fun HomePage(
                             color = MaterialTheme.colorScheme.onBackground
                         )
 
-                        // **Today & Monthly Expense Column**
+                        // ~~ Today & Monthly Expense Column
                         Column(
                             modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.SpaceEvenly,
+                            verticalArrangement = Arrangement.SpaceAround,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
@@ -192,7 +190,7 @@ fun HomePage(
                 }
             }
 
-            // **Expense List**
+            // ~~ Expense List
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -209,7 +207,7 @@ fun HomePage(
             }
         }
 
-        // **Floating Action Button (FAB)**
+        // ~~ Floating Action Button (FAB)
         FloatingActionButton(
             onClick = { isPersonalSheetOpen = true },
             modifier = Modifier
@@ -231,6 +229,7 @@ fun HomePage(
             }
         }
     }
+
 
     // **Add Expense Bottom Sheet**
     if (isPersonalSheetOpen) {

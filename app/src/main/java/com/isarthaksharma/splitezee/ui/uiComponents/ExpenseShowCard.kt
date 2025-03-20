@@ -7,7 +7,9 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -19,11 +21,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.isarthaksharma.splitezee.R
 import java.text.SimpleDateFormat
@@ -40,27 +42,27 @@ fun ExpenseShowCard(
     expenseCurrency: String
 ) {
     val colorInvert:Color = if (isSystemInDarkTheme()) { Color.Black }else{ Color.White }
+
+    // ***************** Main Card UI *****************
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(shape = RoundedCornerShape(10.dp)),
-        colors = CardDefaults.cardColors(containerColor = if (isSystemInDarkTheme()) {
-            Color.White
-        }else{
-            Color.Black
-        } ),
+            .clip(shape = RoundedCornerShape(10.dp))
+            .pointerInput(Unit){
+
+            },
+        colors = CardDefaults.cardColors(containerColor = if (isSystemInDarkTheme()) { Color.White }else{ Color.Black } ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            // Title and Date Section
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // ~~ Title and Date Section
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+
+                // ~~ Expense Name
                 Text(
                     text = expense,
                     color = colorInvert,
@@ -74,6 +76,7 @@ fun ExpenseShowCard(
 
                 )
 
+                // ~~ Expense Date
                 Text(
                     text = convertLongToDate(expenseDate),
                     color = colorInvert,
@@ -83,7 +86,7 @@ fun ExpenseShowCard(
                 )
             }
 
-            // Expense Amount Section
+            // ~~ Expense Amount
             Text(
                 text = "$expenseCurrency ${String.format("%.2f", expenseAmt)}",
                 color = colorInvert,
@@ -92,7 +95,7 @@ fun ExpenseShowCard(
                 modifier = Modifier.padding(horizontal = 10.dp)
             )
 
-            // Expense Message Section
+            // ~~ Expense Message (If Any)
             if (!expenseMsg.isNullOrBlank()) {
                 HorizontalDivider(
                     modifier = Modifier
@@ -107,9 +110,10 @@ fun ExpenseShowCard(
                     style = MaterialTheme.typography.titleMedium,
                     fontFamily = FontFamily(Font(R.font.roboto_flex)),
                     modifier = Modifier.fillMaxWidth()
-                        .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
+                        .padding(start = 10.dp, end = 10.dp)
                 )
             }
+            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }
