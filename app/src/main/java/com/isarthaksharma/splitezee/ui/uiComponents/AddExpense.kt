@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.isarthaksharma.splitezee.R
 import com.isarthaksharma.splitezee.localStorage.dataClass.PersonalDataClass
-import com.isarthaksharma.splitezee.viewModel.ViewModelFireStoreUpload
+import com.isarthaksharma.splitezee.viewModel.ViewModelFireStore
 import com.isarthaksharma.splitezee.viewModel.ViewModelPersonalDB
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -45,7 +45,7 @@ fun AddExpense(
     sheetState: SheetState,
     onDismiss:()->Unit,
     viewModelPersonalDB: ViewModelPersonalDB = hiltViewModel(),
-    viewModelFireStoreUpload: ViewModelFireStoreUpload = hiltViewModel()
+    viewModelFireStoreUpload: ViewModelFireStore = hiltViewModel()
 ) {
     val context = LocalContext.current
     val mCalendar = Calendar.getInstance()

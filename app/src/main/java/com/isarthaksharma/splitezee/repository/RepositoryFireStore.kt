@@ -6,7 +6,7 @@ import com.isarthaksharma.splitezee.localStorage.dataClass.PersonalDataClass
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class RepositoryFireStoreUpload @Inject constructor(private val firestore: FirebaseFirestore){
+class RepositoryFireStore @Inject constructor(private val firestore: FirebaseFirestore){
 
     suspend fun getExpensesFromFireStore(userId: String): List<PersonalDataClass> {
         return try {

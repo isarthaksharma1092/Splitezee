@@ -8,41 +8,22 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDataClass
 import com.isarthaksharma.splitezee.localStorage.dataClass.PersonalDataClass
-import com.isarthaksharma.splitezee.repository.RepositoryFireStoreUpload
+import com.isarthaksharma.splitezee.repository.RepositoryFireStore
 import com.isarthaksharma.splitezee.repository.RepositoryPersonalDB
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ViewModelFireStoreUpload @Inject constructor(
+class ViewModelFireStore @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val repositoryFireStoreUpload: RepositoryFireStoreUpload,
+    private val repositoryFireStore: RepositoryFireStore,
     private val repositoryPersonalDB:RepositoryPersonalDB
 ): ViewModel(
 
 ){
-    val localData: StateFlow<List<PersonalDataClass>> = repositoryPersonalDB.getAllExpenses().stateIn(
-        viewModelScope, SharingStarted.Lazily, emptyList()
-    )
-
-    fun syncDataIfNeeded(userId: String) {
-        viewModelScope.launch {
-            val localExpenses = repositoryPersonalDB.getAllExpensesOnce()
-
-            if (localExpenses.isEmpty()) {  // If local DB is empty
-                val firestoreData = remoteRepository.getExpensesFromFirestore(userId)
-
-                if (firestoreData.isNotEmpty()) {
-                    repositoryPersonalDB.insertExpenses(firestoreData) // Restore to RoomDB
-                }
-            }
-        }
-    }
-
     // User Exist Check
     private val _emailExists = MutableStateFlow<Boolean?>(null)
     val emailExists:StateFlow<Boolean?> = _emailExists
@@ -55,14 +36,14 @@ class ViewModelFireStoreUpload @Inject constructor(
 
     fun checkEmail(email: String) {
         viewModelScope.launch {
-            _emailExists.emit(repositoryFireStoreUpload.checkIfEmailExists(email))
+            _emailExists.emit(repositoryFireStore.checkIfEmailExists(email))
         }
     }
 
     fun uploadPersonalExpense(expense:PersonalDataClass){
         val userId = Firebase.auth.currentUser?.uid ?: return
         viewModelScope.launch {
-            repositoryFireStoreUpload.uploadPersonalExpense(
+            repositoryFireStore.uploadPersonalExpense(
                 userId = userId,
                 expense = expense
             )

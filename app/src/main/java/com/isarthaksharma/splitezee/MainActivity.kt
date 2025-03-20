@@ -17,10 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.CreditCard
-import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,10 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
@@ -84,14 +79,26 @@ fun MainScreen() {
     var showBottomBar by rememberSaveable { mutableStateOf(false) }
     var selectedBottomNavBar by rememberSaveable { mutableStateOf("") }
 
-    val gradientColors = listOf(
-        Color(0xFF38DF57),
-        Color(0xFF04A9FB),
-        Color.Black,
-        Color.Black,
-        Color.Black
-    )
-
+    val gradientColors = if (isSystemInDarkTheme()) {
+        listOf(
+            Color(0xFFBBFCBE),
+            Color(0xFF86C8FC),
+            Color.Black,
+            Color.Black,
+            Color.Black,
+            Color.Black,
+            Color.Black
+        )
+    } else { listOf(
+            Color(0xFFBBFCBE),
+            Color(0xFF86C8FC),
+            Color.White,
+            Color.White,
+            Color.White,
+            Color.White,
+            Color.White
+        ) }
+    val colorInvert:Color = if (isSystemInDarkTheme()) { Color.Black }else{ Color.White }
 
     Scaffold(
         bottomBar = {
@@ -108,12 +115,16 @@ fun MainScreen() {
                                 )
                             )
                         )
-                        .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(24.dp)) // Subtle border effect
+                        .border(
+                            1.dp,
+                            Color.White.copy(alpha = 0.3f),
+                            RoundedCornerShape(24.dp)
+                        )
                 ) {
                     selectedBottomNavBar = "Personal"
                     NavigationBar(
-                        containerColor = Color.Transparent, // Removes Material default color
-                        tonalElevation = 0.dp // Removes shadow effects from MaterialTheme
+                        containerColor = Color.Transparent,
+                        tonalElevation = 0.dp
                     ) {
                         bottomItems().forEachIndexed { index, item ->
                             NavigationBarItem(
@@ -132,7 +143,7 @@ fun MainScreen() {
                                     Icon(
                                         if (index == selectedItem) item.selectedIcon else item.unselectedIcon,
                                         contentDescription = item.title,
-                                        tint = if (selectedItem == index) Color.Black else Color.Gray
+                                        tint = if (selectedItem == index) Color.Black else Color.White
                                     )
                                 },
                                 label = {
@@ -140,10 +151,8 @@ fun MainScreen() {
                                         text = item.title,
                                         style = MaterialTheme.typography.titleSmall,
                                         color = if (selectedItem == index) {
-                                            if (isSystemInDarkTheme()) Color.Black else Color.White
-                                        } else {
-                                            Color.Gray
-                                        }
+                                            colorInvert
+                                        } else { Color.Gray }
                                     )
                                 }
                             )
@@ -333,7 +342,7 @@ fun NavigationPage(
             GroupPage(
                 navController,
                 modifier,
-            ){
+            ) {
                 navController.navigate(NavigationUtility.GroupDetailsPage)
             }
         }
@@ -372,7 +381,7 @@ fun NavigationPage(
                     animationSpec = tween(durationMillis = 300)
                 )
             }
-        ){
+        ) {
             onBottomBarVisibilityChange(false)
             GroupDetailsPage()
         }

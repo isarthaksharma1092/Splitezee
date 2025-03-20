@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDataClass
-import com.isarthaksharma.splitezee.viewModel.ViewModelFireStoreUpload
+import com.isarthaksharma.splitezee.viewModel.ViewModelFireStore
 import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDB
 import java.util.regex.Pattern
 
@@ -48,7 +48,7 @@ import java.util.regex.Pattern
 fun CreateGroup(
     onDismiss: () -> Unit,
     viewModelGroupDB: ViewModelGroupDB = hiltViewModel(),
-    viewModelFireStoreUpload: ViewModelFireStoreUpload = hiltViewModel()
+    viewModelFireStoreUpload: ViewModelFireStore = hiltViewModel()
 ) {
     var isEmailExists by remember { mutableStateOf<Boolean?>(null) }
 

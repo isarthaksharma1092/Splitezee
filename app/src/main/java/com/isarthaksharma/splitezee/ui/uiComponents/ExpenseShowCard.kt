@@ -39,11 +39,16 @@ fun ExpenseShowCard(
     expenseMsg: String?,
     expenseCurrency: String
 ) {
+    val colorInvert:Color = if (isSystemInDarkTheme()) { Color.Black }else{ Color.White }
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape = RoundedCornerShape(10.dp)),
-        colors = CardDefaults.cardColors(containerColor = Color.White ),
+        colors = CardDefaults.cardColors(containerColor = if (isSystemInDarkTheme()) {
+            Color.White
+        }else{
+            Color.Black
+        } ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -58,7 +63,7 @@ fun ExpenseShowCard(
             ) {
                 Text(
                     text = expense,
-                    color = Color.Black,
+                    color = colorInvert,
                     style = MaterialTheme.typography.headlineSmall,
                     fontFamily = FontFamily(Font(R.font.roboto_flex, FontWeight.ExtraBold)),
                     modifier = Modifier
@@ -71,7 +76,7 @@ fun ExpenseShowCard(
 
                 Text(
                     text = convertLongToDate(expenseDate),
-                    color = Color.Black,
+                    color = colorInvert,
                     style = MaterialTheme.typography.titleMedium,
                     fontFamily = FontFamily(Font(R.font.roboto_flex, FontWeight.Bold)),
                     modifier = Modifier.padding(horizontal = 2.dp)
@@ -81,7 +86,7 @@ fun ExpenseShowCard(
             // Expense Amount Section
             Text(
                 text = "$expenseCurrency ${String.format("%.2f", expenseAmt)}",
-                color = Color.Black,
+                color = colorInvert,
                 style = MaterialTheme.typography.titleLarge,
                 fontFamily = FontFamily(Font(R.font.roboto_flex)),
                 modifier = Modifier.padding(horizontal = 10.dp)
@@ -98,7 +103,7 @@ fun ExpenseShowCard(
 
                 Text(
                     text = "Note : $expenseMsg",
-                    color = Color.Black,
+                    color = colorInvert,
                     style = MaterialTheme.typography.titleMedium,
                     fontFamily = FontFamily(Font(R.font.roboto_flex)),
                     modifier = Modifier.fillMaxWidth()
