@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -54,12 +55,15 @@ import com.isarthaksharma.splitezee.R
 import com.isarthaksharma.splitezee.ui.uiComponents.AlertBoxMenu
 import com.isarthaksharma.splitezee.viewModel.AuthenticateUserViewModel
 import com.isarthaksharma.splitezee.viewModel.UserInfoViewModel
+import com.isarthaksharma.splitezee.BuildConfig
+import com.isarthaksharma.splitezee.viewModel.ViewModelPersonalDB
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingPage(
     userInfoViewModel: UserInfoViewModel = hiltViewModel(),
     authenticateUserViewModel: AuthenticateUserViewModel = hiltViewModel(),
+    viewModelPersonalDB: ViewModelPersonalDB = hiltViewModel(),
     goLoginScreen: () -> Unit
 ) {
     val userProfile by userInfoViewModel.userProfile.collectAsState()
@@ -67,9 +71,11 @@ fun SettingPage(
     var selectedCurrency by remember { mutableStateOf("₹ - Indian Rupee") }
     val context = LocalContext.current
 
-    Column(modifier = Modifier
-        .background(if (isSystemInDarkTheme()) Color.Black else Color.White)
-        .padding(top = 40.dp, start = 10.dp, end = 10.dp)){
+    Column(
+        modifier = Modifier
+            .background(if (isSystemInDarkTheme()) Color.Black else Color.White)
+            .padding(top = 40.dp, start = 10.dp, end = 10.dp)
+    ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = "Settings",
@@ -156,54 +162,60 @@ fun SettingPage(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            Card(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .shadow(8.dp, shape = RoundedCornerShape(16.dp)),
-                elevation = CardDefaults.cardElevation(8.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+            Column {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .shadow(8.dp, shape = RoundedCornerShape(16.dp)),
+                    elevation = CardDefaults.cardElevation(8.dp)
                 ) {
-                    Text(
-                        text = "App Version: $versionName",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Button(
-                        onClick = Toast.,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFDD00)), // Coffee yellow color
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier
-                            .height(48.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Icon(
-                            painter = Icons.default.Coffee
-                            contentDescription = "Buy Me a Coffee",
-                            tint = Color.Black,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Buy Me a Coffee",
+                            text = "App Version: ${BuildConfig.VERSION_NAME}",
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = Color.Black
+                            color = MaterialTheme.colorScheme.onBackground
                         )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Button(
+                            onClick = {
+                                Toast.makeText(
+                                    context,
+                                    "Just Watch Ads\nThanks",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFDD00)), // Coffee yellow color
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .height(48.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                        ) {
+                            Icon(
+                                Icons.Default.Coffee,
+                                contentDescription = "Buy Me a Coffee",
+                                tint = Color.Black,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Buy Me a Coffee",
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
+                        }
                     }
                 }
             }
-        }
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(5.dp))
             Button(
                 onClick = { openAlertDialog = true },
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.onErrorContainer),
@@ -232,6 +244,7 @@ fun SettingPage(
                 onConfirmation = {
                     openAlertDialog = false
                     authenticateUserViewModel.logout()
+                    viewModelPersonalDB.cleanAllUserData()
                     goLoginScreen()
                 },
                 dialogTitle = "Logout",

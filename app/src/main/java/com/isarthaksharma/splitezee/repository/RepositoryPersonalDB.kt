@@ -56,7 +56,6 @@ class RepositoryPersonalDB @Inject constructor(
             for (expense in expensesFromFireStore) {
                 val localExpense = dao.getExpenseById(expense.expenseId)
                 if (localExpense == null) {
-                    // ~~ Insert only if it doesn't exist
                     dao.addPersonalExpense(expense)
                 }
             }
