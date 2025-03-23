@@ -70,11 +70,9 @@ fun LoginPage(
         }
     }
 
-    // ✅ Runs Sync AFTER Successful Authentication
     LaunchedEffect(authState) {
         if (authState is AuthResponse.Success) {
             val userId = Firebase.auth.currentUser?.uid ?: return@LaunchedEffect
-
             Toast.makeText(context, "Syncing Expenses...", Toast.LENGTH_SHORT).show()
             viewModelPersonalDB.syncExpensesFromFireStore(userId)
             goHomePage()

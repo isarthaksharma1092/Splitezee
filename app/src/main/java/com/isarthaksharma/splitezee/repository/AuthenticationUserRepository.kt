@@ -2,6 +2,7 @@
 
 package com.isarthaksharma.splitezee.repository
 
+import com.isarthaksharma.splitezee.R
 import android.content.Context
 import android.content.Intent
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -25,7 +26,7 @@ class AuthenticationUserRepository @Inject constructor(
 
     private val googleSignInClient by lazy {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(0))
+            .requestIdToken(context.getString(R.string.Client_WebID))
             .requestEmail()
             .requestProfile()
             .build()
