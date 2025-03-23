@@ -343,5 +343,4 @@ fun HomePage(
             }
         )
     }
-
 }

@@ -42,28 +42,44 @@ class RepositoryPersonalDB @Inject constructor(
     }
 
     suspend fun syncExpensesFromFireStore(userId: String) {
-        val firestoreRef = firestore.collection("users")
+        val firestoreRef = firestore
+            .collection("users")
             .document(userId)
             .collection("expenses")
 
         try {
+            Log.d("Syncing", "Fetching expenses for user: $userId")
             val snapshot = firestoreRef.get().await()
 
+            Log.d("Syncing", "Fetched ${snapshot.documents.size} documents from Firestore")
+
+            if (snapshot.documents.isEmpty()) {
+                Log.w("Syncing", "No expenses found in Firestore for this user.")
+                return
+            }
+
             val expensesFromFireStore = snapshot.documents.mapNotNull { doc ->
+                Log.d("Syncing", "Firestore document: ${doc.data}") // ✅ Debug Firestore data
                 doc.toObject(PersonalDataClass::class.java)
             }
 
             for (expense in expensesFromFireStore) {
                 val localExpense = dao.getExpenseById(expense.expenseId)
+                Log.d("Syncing", "Checking RoomDB for expenseId: ${expense.expenseId}, Found: $localExpense")
+
                 if (localExpense == null) {
-                    dao.addPersonalExpense(expense)
+                    dao.addPersonalExpense(expense) // ✅ Insert missing expense
+                    Log.d("Syncing", "Inserted new expense: ${expense.expenseId}")
+                } else {
+                    dao.updateExpense(expense) // ✅ Update existing expense
+                    Log.d("Syncing", "Updated existing expense: ${expense.expenseId}")
                 }
             }
 
-            Log.d("Sync", "Expenses synced successfully from FireStore")
+            Log.d("Syncing", "Expenses synced successfully from Firestore")
 
         } catch (e: Exception) {
-            Log.e("Sync", "Error syncing expenses: ${e.message}")
+            Log.e("Syncing", "Error syncing expenses: ${e.message}", e)
         }
     }
 }

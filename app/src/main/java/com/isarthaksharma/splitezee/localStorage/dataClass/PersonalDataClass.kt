@@ -11,4 +11,6 @@ data class PersonalDataClass(
     val expenseMsg: String?,
     val expenseDate: Long,
     val expenseCurrency: String
-)
+){
+    constructor() : this("", "", 0.0, "", 0L, "")
+}

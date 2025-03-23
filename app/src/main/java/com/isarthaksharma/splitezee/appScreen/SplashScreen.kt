@@ -25,18 +25,16 @@ fun SplashScreen(
     authenticateUserViewModel: AuthenticateUserViewModel = hiltViewModel(),
     doNavigation: (Boolean) -> Unit,
 ) {
-
     val authState = authenticateUserViewModel.authState.collectAsState()
     LaunchedEffect(Unit) {
-        delay(2500)
-        if (authState.value is AuthResponse.Success){
+        if (authState.value is AuthResponse.Success) {
+            delay(1000)
             doNavigation(true)
-        }else{
+        } else {
+            delay(2500)
             doNavigation(false)
         }
-
     }
-
     Column(
         modifier,
         verticalArrangement = Arrangement.Center,

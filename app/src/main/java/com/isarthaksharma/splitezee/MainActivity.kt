@@ -111,9 +111,9 @@ fun MainScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
+                        .background(Brush.verticalGradient(
+                            colors = listOf
+                                (
                                     Color(0xFF58ACF1).copy(alpha = 0.2f),
                                     Color(0xFF58ACF1).copy(alpha = 0.5f)
                                 )
@@ -176,7 +176,6 @@ fun MainScreen() {
             }
         }
     )
-
     SetTransparentStatusBar()
 }
 
@@ -188,6 +187,7 @@ fun SetTransparentStatusBar() {
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
+            @Suppress("DEPRECATION")
             window.statusBarColor = Color.Transparent.toArgb()
             WindowCompat.setDecorFitsSystemWindows(window, false)
         }

@@ -44,7 +44,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.ktx.auth
@@ -53,8 +52,6 @@ import com.isarthaksharma.splitezee.R
 import com.isarthaksharma.splitezee.repository.AuthResponse
 import com.isarthaksharma.splitezee.viewModel.AuthenticateUserViewModel
 import com.isarthaksharma.splitezee.viewModel.ViewModelPersonalDB
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 @Composable
 fun LoginPage(
@@ -65,14 +62,6 @@ fun LoginPage(
     val authState by authenticateUserViewModel.authState.collectAsState()
     val context = LocalContext.current
 
-    LaunchedEffect(authState) {
-        if (authState is AuthResponse.Success) {
-            val userId = Firebase.auth.currentUser?.uid ?: return@LaunchedEffect
-            viewModelPersonalDB.syncExpensesFromFireStore(userId) // ✅ Sync once only
-            goHomePage()
-            Toast.makeText(context, "Welcome", Toast.LENGTH_LONG).show()
-        }
-    }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try { authenticateUserViewModel.signInWithGoogle(task) }
@@ -81,12 +70,23 @@ fun LoginPage(
         }
     }
 
+    // ✅ Runs Sync AFTER Successful Authentication
+    LaunchedEffect(authState) {
+        if (authState is AuthResponse.Success) {
+            val userId = Firebase.auth.currentUser?.uid ?: return@LaunchedEffect
+
+            Toast.makeText(context, "Syncing Expenses...", Toast.LENGTH_SHORT).show()
+            viewModelPersonalDB.syncExpensesFromFireStore(userId)
+            goHomePage()
+            Toast.makeText(context, "Welcome", Toast.LENGTH_LONG).show()
+        }
+    }
+
     when (authState) {
         is AuthResponse.Loading -> CustomProgressBar()
-        else -> LoginUI(authenticateUserViewModel,launcher)
+        else -> LoginUI(authenticateUserViewModel, launcher)
     }
 }
-
 @Composable
 fun LoginUI(
     authenticateUserViewModel: AuthenticateUserViewModel,
