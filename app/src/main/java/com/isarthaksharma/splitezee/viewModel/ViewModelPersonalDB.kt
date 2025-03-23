@@ -69,5 +69,11 @@ class ViewModelPersonalDB @Inject constructor(private val repository: Repository
             repository.clearUserData()
         }
     }
+
+    fun updatePersonalExpense(expense: PersonalDataClass){
+        viewModelScope.launch {
+            repository.updatePersonalExpense(expense)
+        }
+    }
 }
 

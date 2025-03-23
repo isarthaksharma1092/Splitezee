@@ -32,7 +32,7 @@ class AuthenticateUserViewModel @Inject constructor(
         viewModelScope.launch {
             _authState.value = AuthResponse.Loading
             val response = authenticationUserRepository.signInWithGoogle(task)
-            Log.d("AuthViewModel", "Auth Response: $response") // ✅ Debug Log
+            Log.d("AuthViewModel", "Auth Response: $response")
 
             _authState.value = response
         }

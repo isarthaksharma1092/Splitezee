@@ -16,10 +16,10 @@ android {
 
     defaultConfig {
         applicationId = "com.isarthaksharma.splitezee"
-        minSdk = 30
+        minSdk = 28
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.6.1"
+        versionCode = 2
+        versionName = "1.7.0-beta"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -100,7 +100,7 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.11.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
 //    implementation ("com.google.android.gms:play-services:24.0.0")

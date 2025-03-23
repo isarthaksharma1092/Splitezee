@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.isarthaksharma.splitezee.localStorage.dataClass.PersonalDataClass
 import kotlinx.coroutines.flow.Flow
 
@@ -29,4 +30,7 @@ interface DaoPersonal {
 
     @Query("Delete from PersonalDataClass")
     suspend fun clearUserData()
+
+    @Update
+    suspend fun updateExpense(expense: PersonalDataClass)
 }

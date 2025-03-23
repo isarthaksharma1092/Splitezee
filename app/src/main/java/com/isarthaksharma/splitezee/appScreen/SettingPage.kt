@@ -21,9 +21,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -48,7 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.isarthaksharma.splitezee.R
-import com.isarthaksharma.splitezee.ui.uiComponents.LogoutAlertBox
+import com.isarthaksharma.splitezee.ui.uiComponents.AlertBoxMenu
 import com.isarthaksharma.splitezee.viewModel.AuthenticateUserViewModel
 import com.isarthaksharma.splitezee.viewModel.UserInfoViewModel
 
@@ -152,7 +155,54 @@ fun SettingPage(
                     }
                 )
             }
+            Spacer(modifier = Modifier.weight(1f))
+            Card(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .shadow(8.dp, shape = RoundedCornerShape(16.dp)),
+                elevation = CardDefaults.cardElevation(8.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "App Version: $versionName",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
 
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Button(
+                        onClick = Toast.,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFDD00)), // Coffee yellow color
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                    ) {
+                        Icon(
+                            painter = Icons.default.Coffee
+                            contentDescription = "Buy Me a Coffee",
+                            tint = Color.Black,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Buy Me a Coffee",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    }
+                }
+            }
+        }
             Spacer(modifier = Modifier.weight(1f))
             Button(
                 onClick = { openAlertDialog = true },
@@ -177,7 +227,7 @@ fun SettingPage(
             }
         }
         if (openAlertDialog) {
-            LogoutAlertBox(
+            AlertBoxMenu(
                 onDismissRequest = { openAlertDialog = false },
                 onConfirmation = {
                     openAlertDialog = false
@@ -185,7 +235,9 @@ fun SettingPage(
                     goLoginScreen()
                 },
                 dialogTitle = "Logout",
-                dialogText = "All your saved data will be removed. Are you sure you want to proceed ?"
+                dialogText = "All your saved data will be removed. Are you sure you want to proceed ?",
+                option1 = "Cancel",
+                option2 = "Logout"
             )
         }
     }

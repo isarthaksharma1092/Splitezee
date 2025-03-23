@@ -9,7 +9,6 @@ import com.google.firebase.ktx.Firebase
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDataClass
 import com.isarthaksharma.splitezee.localStorage.dataClass.PersonalDataClass
 import com.isarthaksharma.splitezee.repository.RepositoryFireStore
-import com.isarthaksharma.splitezee.repository.RepositoryPersonalDB
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,11 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ViewModelFireStore @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val repositoryFireStore: RepositoryFireStore,
-    private val repositoryPersonalDB:RepositoryPersonalDB
-): ViewModel(
-
-){
+    private val repositoryFireStore: RepositoryFireStore
+): ViewModel(){
     // User Exist Check
     private val _emailExists = MutableStateFlow<Boolean?>(null)
     val emailExists:StateFlow<Boolean?> = _emailExists
@@ -40,15 +36,24 @@ class ViewModelFireStore @Inject constructor(
         }
     }
 
-    fun uploadPersonalExpense(expense:PersonalDataClass){
+    fun uploadPersonalExpense(expense:PersonalDataClass,expenseId:String){
         val userId = Firebase.auth.currentUser?.uid ?: return
         viewModelScope.launch {
             repositoryFireStore.uploadPersonalExpense(
                 userId = userId,
-                expense = expense
+                expense = expense,
+                expenseId = expenseId
             )
         }
     }
+
+    fun removePersonalExpense(expenseID: String){
+        val userId = Firebase.auth.currentUser?.uid ?: return
+        viewModelScope.launch {
+            repositoryFireStore.removePersonalExpense(userId,expenseID)
+        }
+    }
+
     fun createGroup(groupName: String, members: List<String>) {
         val userEmail = FirebaseAuth.getInstance().currentUser?.email ?: return
         val groupId = firestore.collection("groups").document().id
@@ -68,6 +73,13 @@ class ViewModelFireStore @Inject constructor(
             } catch (e: Exception) {
                 _groupCreationStatus.value = "Error creating group: ${e.message}"
             }
+        }
+    }
+
+    fun updatePersonalExpense(expense: PersonalDataClass) {
+        val userId = Firebase.auth.currentUser?.uid ?: return
+        viewModelScope.launch {
+            repositoryFireStore.updatePersonalExpense(userId, expense)
         }
     }
 }

@@ -21,7 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -42,17 +42,14 @@ fun ExpenseShowCard(
     expenseCurrency: String
 ) {
     val colorInvert:Color = if (isSystemInDarkTheme()) { Color.Black }else{ Color.White }
-
     // ***************** Main Card UI *****************
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(shape = RoundedCornerShape(10.dp))
-            .pointerInput(Unit){
-
-            },
+            .clip(shape = RoundedCornerShape(10.dp)),
         colors = CardDefaults.cardColors(containerColor = if (isSystemInDarkTheme()) { Color.White }else{ Color.Black } ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+
     ) {
 
         Column(modifier = Modifier.fillMaxWidth()) {

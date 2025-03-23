@@ -31,4 +31,8 @@ class RepositoryPersonalDB @Inject constructor(private val dao: DaoPersonal) {
     suspend fun clearUserData() {
         dao.clearUserData()
     }
+
+    suspend fun updatePersonalExpense(expense: PersonalDataClass) {
+        dao.updateExpense(expense)
+    }
 }

@@ -1,6 +1,8 @@
 package com.isarthaksharma.splitezee.appScreen
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,8 +18,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,18 +31,23 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -47,9 +57,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.isarthaksharma.splitezee.R
+import com.isarthaksharma.splitezee.localStorage.dataClass.PersonalDataClass
 import com.isarthaksharma.splitezee.ui.uiComponents.AddExpense
+import com.isarthaksharma.splitezee.ui.uiComponents.AlertBoxMenu
+import com.isarthaksharma.splitezee.ui.uiComponents.EditExpense
 import com.isarthaksharma.splitezee.ui.uiComponents.ExpenseShowCard
 import com.isarthaksharma.splitezee.viewModel.UserInfoViewModel
+import com.isarthaksharma.splitezee.viewModel.ViewModelFireStore
 import com.isarthaksharma.splitezee.viewModel.ViewModelPersonalDB
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
@@ -58,6 +72,7 @@ fun HomePage(
     modifier: Modifier,
     userInfoViewModel: UserInfoViewModel = hiltViewModel(),
     viewModelPersonalDB: ViewModelPersonalDB = hiltViewModel(),
+    viewModelFireStore: ViewModelFireStore = hiltViewModel(),
     goSetting: () -> Unit
 ) {
     val userProfile by userInfoViewModel.userProfile.collectAsState()
@@ -71,8 +86,10 @@ fun HomePage(
     var isPersonalSheetOpen by rememberSaveable { mutableStateOf(false) }
 
     val cardColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
+    var openDelAlert by remember { mutableStateOf(false) }
+    var selectedExpense by remember { mutableStateOf<PersonalDataClass?>(null) }
+    var openEditDialog by remember { mutableStateOf(false) }
 
-//    val dismissState = rememberDismissState()
     Box(modifier = modifier) {
         Column(modifier = Modifier.fillMaxSize()) {
 
@@ -104,12 +121,12 @@ fun HomePage(
 
             // ***************** Total Spent Banner *****************
             Card(
-                elevation = CardDefaults.cardElevation(70.dp),
+                elevation = CardDefaults.cardElevation(100.dp),
                 colors = CardDefaults.cardColors(containerColor = cardColor),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(180.dp)
-                    .padding(bottom = 5.dp),
+                    .padding(bottom = 10.dp),
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -196,12 +213,91 @@ fun HomePage(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(expenses) { expense ->
-                    ExpenseShowCard(
-                        expense.expenseName,
-                        expense.expenseDate,
-                        expense.expenseAmt,
-                        expense.expenseMsg,
-                        expense.expenseCurrency
+
+                    val swipeState = rememberSwipeToDismissBoxState(
+                        confirmValueChange = {
+                            when (it) {
+                                SwipeToDismissBoxValue.EndToStart -> {
+                                    selectedExpense = expense
+                                    openDelAlert = true
+                                    false
+                                }
+
+                                SwipeToDismissBoxValue.StartToEnd -> {
+                                    selectedExpense = expense
+                                    openEditDialog = true
+                                    false
+                                }
+
+                                else -> false
+                            }
+                        },
+                        positionalThreshold = { 0.25f }
+                    )
+
+                    // Delete Confirmation Dialog
+                    if (openDelAlert && selectedExpense == expense) {
+                        AlertBoxMenu(
+                            onDismissRequest = {
+                                openDelAlert = false
+                                selectedExpense = null
+                            },
+                            onConfirmation = {
+                                selectedExpense?.let {
+                                    viewModelPersonalDB.removePersonalExpense(it)
+                                    viewModelFireStore.removePersonalExpense(expenseID = it.expenseId)
+                                }
+                                openDelAlert = false
+                                selectedExpense = null
+                            },
+                            dialogTitle = "Delete Expense?",
+                            dialogText = "Are you sure you want to delete it?",
+                            option1 = "Cancel",
+                            option2 = "Delete"
+                        )
+                    }
+
+                    // Edit Expense Dialog
+                    if (openEditDialog && selectedExpense == expense) {
+                        openEditDialog = true
+                    }
+                    val backgroundColor by animateColorAsState(
+                        targetValue = when (swipeState.targetValue) {
+                            SwipeToDismissBoxValue.StartToEnd -> Color.Blue // Edit
+                            SwipeToDismissBoxValue.EndToStart -> Color.Red // Delete
+                            else -> Color.Gray // Default (neutral state)
+                        }, label = "SwipeColor"
+                    )
+                    SwipeToDismissBox(
+                        state = swipeState,
+                        backgroundContent = {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(shape = RoundedCornerShape(10.dp))
+                                    .background(backgroundColor) // Smooth color transition
+                                    .padding(horizontal = 8.dp),
+                                contentAlignment = if (swipeState.targetValue == SwipeToDismissBoxValue.StartToEnd) Alignment.CenterStart else Alignment.CenterEnd
+                            ) {
+                                Icon(
+                                    imageVector = if (swipeState.targetValue == SwipeToDismissBoxValue.StartToEnd) Icons.Default.Edit else Icons.Default.Delete,
+                                    contentDescription = if (swipeState.targetValue == SwipeToDismissBoxValue.StartToEnd) "Edit" else "Delete",
+                                    tint = Color.White
+                                )
+                            }
+                        },
+                        enableDismissFromStartToEnd = true,
+                        enableDismissFromEndToStart = true,
+                        gesturesEnabled = true,
+                        content = {
+                            ExpenseShowCard(
+                                expense.expenseName,
+                                expense.expenseDate,
+                                expense.expenseAmt,
+                                expense.expenseMsg,
+                                expense.expenseCurrency
+                            )
+                        }
                     )
                 }
             }
@@ -212,14 +308,14 @@ fun HomePage(
             onClick = { isPersonalSheetOpen = true },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp),
+                .padding(10.dp),
             containerColor = MaterialTheme.colorScheme.primary
         ) {
             Row {
                 Icon(
                     Icons.Default.Add,
                     contentDescription = null,
-                    modifier = Modifier.padding(horizontal = 5.dp)
+                    modifier = Modifier.padding(horizontal = 5.dp).align(Alignment.CenterVertically)
                 )
                 Text(
                     text = "Add Expense",
@@ -228,11 +324,24 @@ fun HomePage(
                 )
             }
         }
-    }
 
+    }
 
     // **Add Expense Bottom Sheet**
     if (isPersonalSheetOpen) {
         AddExpense(sheetState, onDismiss = { isPersonalSheetOpen = false })
     }
+
+    if(openEditDialog){
+        EditExpense(
+            expense = selectedExpense!!,
+            onDismiss = { openEditDialog = false },
+            onSave = {updatedExpense->
+                openEditDialog = false
+                viewModelFireStore.updatePersonalExpense(updatedExpense)
+                viewModelPersonalDB.updatePersonalExpense(updatedExpense)
+            }
+        )
+    }
+
 }

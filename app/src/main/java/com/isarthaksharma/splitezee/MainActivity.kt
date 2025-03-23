@@ -97,12 +97,16 @@ fun MainScreen() {
     }
 
     // Color Invert to Background Color
-    val colorInvert: Color = if (isSystemInDarkTheme()) { Color.White } else { Color.Black }
+    val colorInvert: Color = if (isSystemInDarkTheme()) {
+        Color.White
+    } else {
+        Color.Black
+    }
 
     // Bottom NavBar
-    Scaffold(bottomBar = {
+    Scaffold(
+        bottomBar = {
             if (showBottomBar) {
-                // Box Containing Bottom NavBar
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -115,20 +119,16 @@ fun MainScreen() {
                                 )
                             )
                         )
-
                 ) {
-                    selectedBottomNavBar = "Personal"
                     NavigationBar(
                         containerColor = Color.Transparent,
                         tonalElevation = 0.dp
                     ) {
-                        // Bottom NavBar Content
                         bottomItems().forEachIndexed { index, item ->
                             NavigationBarItem(
                                 selected = selectedItem == index,
-
-                                onClick = { if (selectedItem != index)
-                                    {
+                                onClick = {
+                                    if (selectedItem != index) {
                                         selectedItem = index
                                         selectedBottomNavBar = item.title
                                         navController.navigate(item.label) {
@@ -137,7 +137,6 @@ fun MainScreen() {
                                         }
                                     }
                                 },
-
                                 icon = {
                                     Icon(
                                         if (index == selectedItem) item.selectedIcon else item.unselectedIcon,
@@ -145,45 +144,42 @@ fun MainScreen() {
                                         tint = if (selectedItem == index) colorInvert else Color.Gray
                                     )
                                 },
-
                                 label = {
                                     Text(
                                         text = item.title,
                                         style = MaterialTheme.typography.titleSmall,
-                                        color = if (selectedItem == index) {
-                                            colorInvert
-                                        } else {
-                                            Color.Gray
-                                        }
+                                        color = if (selectedItem == index) colorInvert else Color.Gray
                                     )
                                 }
-
                             )
                         }
                     }
                 }
             }
-        }) { _ ->
-
-        NavigationPage(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = gradientColors,
-                        startY = 200f,
-                        endY = 500f
+        },
+        content = { paddingValues ->
+            NavigationPage(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = gradientColors,
+                            startY = 200f,
+                            endY = 500f
+                        )
                     )
-                )
-                .padding(top = 40.dp, start = 10.dp, end = 10.dp, bottom = 100.dp),
-            navController
-        ) { isBottomBarVisible ->
-            showBottomBar = isBottomBarVisible
+                    .padding(paddingValues)
+                    .padding(horizontal = 5.dp),
+                navController
+            ) { isBottomBarVisible ->
+                showBottomBar = isBottomBarVisible
+            }
         }
+    )
 
-        SetTransparentStatusBar()
-    }
+    SetTransparentStatusBar()
 }
+
 
 // Setting the Status Bar for transparent Background
 @Composable

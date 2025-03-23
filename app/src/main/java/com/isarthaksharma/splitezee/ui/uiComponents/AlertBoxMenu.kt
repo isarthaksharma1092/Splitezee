@@ -8,11 +8,13 @@ import androidx.compose.runtime.Composable
 
 // LogoutAlertDialog is a alert dialog to warn user before logging out.
 @Composable
-fun LogoutAlertBox(
+fun AlertBoxMenu(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
     dialogTitle: String,
-    dialogText: String
+    dialogText: String,
+    option1:String,
+    option2:String
 ) {
     AlertDialog(
         title = { Text(text = dialogTitle) },
@@ -20,12 +22,12 @@ fun LogoutAlertBox(
         onDismissRequest = { onDismissRequest() },
         confirmButton = {
             TextButton(onClick = { onConfirmation() }) {
-                Text("Logout", color = MaterialTheme.colorScheme.error)
+                Text(option2, color = MaterialTheme.colorScheme.error)
             }
         },
         dismissButton = {
             TextButton(onClick = { onDismissRequest() }) {
-                Text("Cancel", color = MaterialTheme.colorScheme.onBackground)
+                Text(option1, color = MaterialTheme.colorScheme.onBackground)
             }
         },
         containerColor = MaterialTheme.colorScheme.secondaryContainer

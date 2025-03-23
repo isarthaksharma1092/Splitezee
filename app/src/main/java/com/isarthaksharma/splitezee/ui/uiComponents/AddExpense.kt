@@ -38,6 +38,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,7 +76,6 @@ fun AddExpense(
                 value = expenseState,
                 onValueChange = { expenseState = it },
                 label = { Text("Expense Name",fontFamily = FontFamily(Font(R.font.lumpbump)))},
-
 
                 modifier = Modifier
                     .fillMaxWidth()
@@ -127,17 +127,18 @@ fun AddExpense(
                     }
                     else{
                         Toast.makeText(context,"Added",Toast.LENGTH_LONG).show()
+                        val randomExpenseID = UUID.randomUUID().toString()
                         val expense = PersonalDataClass(
+                            expenseId = randomExpenseID,
                             expenseName = expenseState,
                             expenseAmt = amountState.toDoubleOrNull()!!,
                             expenseMsg = msgState,
                             expenseDate = selectedDate.longValue,
                             expenseCurrency = "₹"
                         )
-                        // Saving to ROOM
+                        // Saving to ROOM & FireStore
                         viewModelPersonalDB.addPersonalExpense(expense)
-                        // Saving to FireStore
-                        viewModelFireStoreUpload.uploadPersonalExpense(expense)
+                        viewModelFireStoreUpload.uploadPersonalExpense(expense, randomExpenseID)
                         onDismiss()
                     }
                 },

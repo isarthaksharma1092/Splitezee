@@ -54,7 +54,6 @@ import com.isarthaksharma.splitezee.ui.uiComponents.CardDesign
 import com.isarthaksharma.splitezee.ui.uiComponents.convertLongToDate
 import com.isarthaksharma.splitezee.viewModel.ViewModelSMS
 
-
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @SuppressLint("ContextCastToActivity")
 @Composable
@@ -69,7 +68,7 @@ fun FinancePage(
     val context = LocalContext.current
     val isTablet = configuration.screenWidthDp >= 600
 
-    // Track permission attempts
+    // ~~ Track permission attempts
     var permissionRequestCount by rememberSaveable { mutableIntStateOf(0) }
     var showPermissionDialog by remember { mutableStateOf(false) }
 
@@ -82,7 +81,7 @@ fun FinancePage(
         } else {
             permissionRequestCount++
 
-            // If denied more than twice, open settings
+            // ~~ If denied more than twice, open settings
             if (permissionRequestCount > 2) {
                 openAppSettings(context)
             } else {
@@ -91,19 +90,19 @@ fun FinancePage(
         }
     }
 
-    // ✅ **Corrected Permission Handling**
-    LaunchedEffect(Unit) { // Runs when FinancePage is entered
+    // ~~ Corrected Permission Handling
+    LaunchedEffect(Unit) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_SMS)
             != PackageManager.PERMISSION_GRANTED
         ) {
             requestPermissionLauncher.launch(Manifest.permission.READ_SMS)
         } else {
-            viewModelSMS.smsData // ✅ Fetch SMS if permission is already granted
+            viewModelSMS.smsData
         }
     }
 
     Column(modifier) {
-        // ✅ **Show UI only when permission is granted**
+        // ~~ Show UI only when permission is granted
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_SMS)
             == PackageManager.PERMISSION_GRANTED
         ) {
@@ -128,7 +127,7 @@ fun FinancePage(
                         modifier = Modifier.clickable(
                             enabled = true,
                             onClick = {
-                                Toast.makeText(context, "Bank Of Baroda Only Supported Bank Right Now", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, "Bank Of Baroda Only Supported Bank Right Now As of Now", Toast.LENGTH_LONG).show()
                             }
                         )
                     )
@@ -153,7 +152,7 @@ fun FinancePage(
                 }
             }
         } else {
-            // ✅ **Show a message if permission is denied**
+            // ~~ Show a message if permission is denied
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.Center,
@@ -178,25 +177,24 @@ fun FinancePage(
                 .fillMaxWidth()
                 .padding(bottom = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.spacedBy(1.dp)
         ) {
             Icon(
                 Icons.Outlined.PrivacyTip,
                 tint = MaterialTheme.colorScheme.primary,
-                contentDescription = null
+                contentDescription = null,
+                modifier = Modifier.padding(horizontal = 5.dp).align(Alignment.CenterVertically)
             )
             Text(
-                text = "We do not upload your SMS data anywhere. Your personal information stays on your device and is not shared anywhere.",
+                text = "Your personal information stays on your device and is not shared anywhere.",
                 style = MaterialTheme.typography.titleSmallEmphasized,
-                fontFamily = FontFamily(Font(R.font.doto, FontWeight.ExtraBold)),
+                fontFamily = FontFamily(Font(R.font.doto, FontWeight.Bold)),
                 color = colorInvert,
-                textAlign = TextAlign.Unspecified,
-                modifier = Modifier.padding(horizontal = 5.dp)
             )
         }
     }
 
-    // ✅ **Permission Explanation Dialog**
+    // ~~ Permission Explanation Dialog
     if (showPermissionDialog) {
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { showPermissionDialog = false },
@@ -219,17 +217,10 @@ fun FinancePage(
     }
 }
 
-// ✅ **Function to Open App Settings if Permission is Denied**
+// ~~ Function to Open App Settings if Permission is Denied
 fun openAppSettings(context: Context) {
     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
         data = Uri.fromParts("package", context.packageName, null)
     }
     context.startActivity(intent)
 }
-
-//// ✅ **Convert Timestamp to Date**
-//fun convertLongToDate(time: Long): String {
-//    val date = Date(time)
-//    val format = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-//    return format.format(date)
-//}
