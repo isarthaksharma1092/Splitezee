@@ -75,5 +75,12 @@ class ViewModelPersonalDB @Inject constructor(private val repository: Repository
             repository.updatePersonalExpense(expense)
         }
     }
+
+    fun syncExpensesFromFireStore(userId:String){
+
+        viewModelScope.launch {
+            repository.syncExpensesFromFireStore(userId)
+        }
+    }
 }
 

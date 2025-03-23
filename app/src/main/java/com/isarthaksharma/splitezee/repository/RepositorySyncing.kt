@@ -25,4 +25,6 @@ class RepositorySyncing @Inject constructor(private val firestore: FirebaseFires
             Result.failure(e) // Return failure instead of throwing
         }
     }
+
+
 }

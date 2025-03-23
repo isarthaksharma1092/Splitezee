@@ -46,13 +46,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.isarthaksharma.splitezee.R
 import com.isarthaksharma.splitezee.repository.AuthResponse
 import com.isarthaksharma.splitezee.viewModel.AuthenticateUserViewModel
+import com.isarthaksharma.splitezee.viewModel.ViewModelPersonalDB
 
 @Composable
 fun LoginPage(
     authenticateUserViewModel: AuthenticateUserViewModel = hiltViewModel(),
+    viewModelPersonalDB: ViewModelPersonalDB = hiltViewModel(),
     goHomePage: () -> Unit
 ) {
     val authState by authenticateUserViewModel.authState.collectAsState()
@@ -60,6 +64,8 @@ fun LoginPage(
 
     LaunchedEffect(authState) {
         if (authState is AuthResponse.Success) {
+            val userId = Firebase.auth.currentUser?.uid ?: return@LaunchedEffect
+            viewModelPersonalDB.syncExpensesFromFireStore(userId)
             goHomePage()
             Toast.makeText(context, "Welcome", Toast.LENGTH_LONG).show()
         }

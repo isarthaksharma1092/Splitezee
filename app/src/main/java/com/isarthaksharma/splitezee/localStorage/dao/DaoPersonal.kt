@@ -3,6 +3,7 @@ package com.isarthaksharma.splitezee.localStorage.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.isarthaksharma.splitezee.localStorage.dataClass.PersonalDataClass
@@ -13,7 +14,7 @@ interface DaoPersonal {
     @Query("SELECT * FROM PersonalDataClass ORDER BY expenseDate DESC")
     fun getAllPersonalExpense(): Flow<List<PersonalDataClass>>
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addPersonalExpense(expense: PersonalDataClass)
 
     @Delete
@@ -33,4 +34,7 @@ interface DaoPersonal {
 
     @Update
     suspend fun updateExpense(expense: PersonalDataClass)
+
+    @Query("SELECT * FROM PersonalDataClass WHERE expenseId = :expenseId LIMIT 1")
+    suspend fun getExpenseById(expenseId: String): PersonalDataClass?
 }
