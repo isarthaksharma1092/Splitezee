@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DaoGroup {
-    @Query("SELECT * FROM GroupDataClass WHERE id = :groupId LIMIT 1")
+    @Query("SELECT * FROM GroupDataClass WHERE groupId = :groupId LIMIT 1")
     suspend fun getGroupById(groupId: Int): GroupDataClass?
 
     @Query("SELECT * FROM GroupDataClass ORDER BY groupCreationData DESC")
@@ -26,6 +26,6 @@ interface DaoGroup {
     @Update
     suspend fun updateGroup(groupInfo: GroupDataClass)
 
-    @Query("UPDATE GroupDataClass SET groupMembers = :members WHERE id = :groupId")
+    @Query("UPDATE GroupDataClass SET groupMembers = :members WHERE groupId = :groupId")
     suspend fun addMemberToGroup(groupId: Int, members: List<String>)
 }

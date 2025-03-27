@@ -3,7 +3,6 @@ package com.isarthaksharma.splitezee.repository
 import android.content.Context
 import android.content.pm.PackageManager
 import android.database.Cursor
-import android.net.Uri
 import android.util.Log
 import androidx.core.content.ContextCompat
 import com.isarthaksharma.splitezee.dataClass.SMSDataClass
@@ -11,6 +10,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import androidx.core.net.toUri
 
 class RepositorySMS @Inject constructor(
     @ApplicationContext private val context: Context
@@ -62,7 +62,7 @@ class RepositorySMS @Inject constructor(
         }
 
         val cursor: Cursor? = context.contentResolver.query(
-            Uri.parse("content://sms/inbox"),
+            "content://sms/inbox".toUri(),
             arrayOf("_id", "address", "body", "date"),
             null,
             null,

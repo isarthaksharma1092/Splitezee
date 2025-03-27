@@ -3,9 +3,11 @@ package com.isarthaksharma.splitezee.di
 import android.content.Context
 import androidx.room.Room
 import com.isarthaksharma.splitezee.localStorage.dao.DaoGroup
+import com.isarthaksharma.splitezee.localStorage.dao.DaoGroupDetails
+import com.isarthaksharma.splitezee.localStorage.dao.DaoGroupExpense
+import com.isarthaksharma.splitezee.localStorage.dao.DaoGroupMember
 import com.isarthaksharma.splitezee.localStorage.dao.DaoPersonal
-import com.isarthaksharma.splitezee.localStorage.dataBase.DatabaseGroup
-import com.isarthaksharma.splitezee.localStorage.dataBase.DatabasePersonal
+import com.isarthaksharma.splitezee.localStorage.dataBase.SplitezeeDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,33 +21,41 @@ class RoomInstance {
 
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): DatabasePersonal {
+    fun provideDatabase(@ApplicationContext context: Context): SplitezeeDatabase{
         return Room.databaseBuilder(
             context.applicationContext,
-            DatabasePersonal::class.java,
-            "Personal_DATABASE"
+            SplitezeeDatabase::class.java,
+            "Splitezee_DATABASE"
         ).build()
     }
 
     @Provides
     @Singleton
-    fun provideExpenseDao(database: DatabasePersonal): DaoPersonal {
-        return database.DaoPersonal()
+    fun provideExpenseDao(database: SplitezeeDatabase): DaoPersonal {
+        return database.daoPersonal()
     }
 
     @Provides
     @Singleton
-    fun provideGroupDatabase(@ApplicationContext context: Context): DatabaseGroup {
-        return Room.databaseBuilder(
-            context.applicationContext,
-            DatabaseGroup::class.java,
-            "Group_DATABASE"
-        ).build()
+    fun provideGroupDao(database: SplitezeeDatabase): DaoGroup {
+        return database.daoGroup()
     }
 
     @Provides
     @Singleton
-    fun provideDaoGroup(database: DatabaseGroup): DaoGroup {
-        return database.DaoGroup()
+    fun provideDaoGroupMember(database: SplitezeeDatabase): DaoGroupMember {
+        return database.daoGroupMember()
+    }
+
+    @Provides
+    @Singleton
+    fun provideDaoGroupDetails(database: SplitezeeDatabase): DaoGroupDetails {
+        return database.daoGroupDetails()
+    }
+
+    @Provides
+    @Singleton
+    fun provideDaoGroupExpense(database: SplitezeeDatabase): DaoGroupExpense {
+        return database.daoGroupExpense()
     }
 }

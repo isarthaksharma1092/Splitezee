@@ -30,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.isarthaksharma.splitezee.R
 import com.isarthaksharma.splitezee.ui.uiComponents.CreateGroup
 import com.isarthaksharma.splitezee.ui.uiComponents.GroupItem
@@ -39,12 +38,10 @@ import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDB
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GroupPage(
-    navController:NavController,
     modifier: Modifier,
     viewModelGroupDB: ViewModelGroupDB = hiltViewModel(),
-    groupDetailsPage: () -> Unit
+    groupDetailsPage: (String) -> Unit
 ) {
-//    val context = LocalContext.current
     var isGroupSheetOpen by rememberSaveable { mutableStateOf(false) }
     val groupDB by viewModelGroupDB.group.collectAsState()
 
@@ -54,7 +51,7 @@ fun GroupPage(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // **Header**
+            // ***************** Header *****************
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -63,31 +60,33 @@ fun GroupPage(
                 Text(
                     text = "Groups",
                     style = MaterialTheme.typography.displaySmallEmphasized,
-                    fontFamily = FontFamily(Font(R.font.doto, FontWeight.ExtraBold)),
+                    fontFamily = FontFamily(Font(R.font.nabla_heading, FontWeight.ExtraBold)),
                     color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Justify,
                     modifier = Modifier.padding(vertical = 10.dp)
                 )
             }
 
-            // **Group List**
+            // ***************** Group List *****************
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(groupDB) {
+                items(groupDB) {it ->
                     GroupItem(
-                        it.groupName,
-                        it.groupAdmin,
-                        it.groupMembers,
+                        groupID = it.groupId,
+                        groupName = it.groupName,
+                        groupMembers = it.groupMembers,
                         totalExpense = 0.0,
                         personalBalance = 0.0
-                    ) { groupDetailsPage() }
+                    ) {groupId ->
+                        groupDetailsPage(groupId)
+                    }
                 }
             }
         }
 
-        // **Floating Action Button (FAB)**
+        // ***************** Floating Action Button (FAB) *****************
         FloatingActionButton(
             onClick = { isGroupSheetOpen = true },
             modifier = Modifier
@@ -110,7 +109,7 @@ fun GroupPage(
         }
     }
 
-    // **Create Group Bottom Sheet**
+    // ***************** Create Group Bottom Sheet *****************
     if (isGroupSheetOpen) {
         CreateGroup(onDismiss = { isGroupSheetOpen = false })
     }

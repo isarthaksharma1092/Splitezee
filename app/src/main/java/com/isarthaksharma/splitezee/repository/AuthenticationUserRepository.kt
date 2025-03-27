@@ -1,5 +1,4 @@
 @file:Suppress("DEPRECATION")
-
 package com.isarthaksharma.splitezee.repository
 
 import com.isarthaksharma.splitezee.R
@@ -23,7 +22,6 @@ class AuthenticationUserRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
     @ApplicationContext private val context: Context
 ) {
-
     private val googleSignInClient by lazy {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(context.getString(R.string.Client_WebID))

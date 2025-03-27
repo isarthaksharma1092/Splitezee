@@ -5,8 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class GroupDataClass(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    @PrimaryKey
+    val groupId: String,
     val groupName: String,
     val groupAdmin:String,
     val groupCreationData:Long,

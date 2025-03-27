@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.CreditCard
+import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,9 +44,11 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.isarthaksharma.splitezee.appScreen.FinancePage
 import com.isarthaksharma.splitezee.appScreen.GroupDetailsPage
 import com.isarthaksharma.splitezee.appScreen.GroupPage
@@ -111,9 +115,10 @@ fun MainScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                        .background(Brush.verticalGradient(
-                            colors = listOf
-                                (
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf
+                                    (
                                     Color(0xFF58ACF1).copy(alpha = 0.2f),
                                     Color(0xFF58ACF1).copy(alpha = 0.5f)
                                 )
@@ -204,12 +209,12 @@ fun bottomItems(): List<BottomDataClass> {
             selectedIcon = Icons.Filled.Person,
             unselectedIcon = Icons.Outlined.Person
         ),
-//        BottomDataClass(
-//            title = "Group",
-//            label = "GroupPage",
-//            selectedIcon = Icons.Filled.Groups,
-//            unselectedIcon = Icons.Outlined.Groups
-//        ),
+        BottomDataClass(
+            title = "Group",
+            label = "GroupPage",
+            selectedIcon = Icons.Filled.Groups,
+            unselectedIcon = Icons.Outlined.Groups
+        ),
         BottomDataClass(
             title = "Finance",
             label = "FinancePage",
@@ -347,10 +352,9 @@ fun NavigationPage(
         ) {
             onBottomBarVisibilityChange(true)
             GroupPage(
-                navController,
-                modifier,
+                modifier
             ) {
-                navController.navigate(NavigationUtility.GroupDetailsPage)
+                navController.navigate("${NavigationUtility.GroupDetailsPage}/$it.groupId")
             }
         }
 
@@ -375,7 +379,7 @@ fun NavigationPage(
         }
 
         composable(
-            route = NavigationUtility.GroupDetailsPage,
+            route = "${NavigationUtility.GroupDetailsPage}/{groupId}",
             enterTransition = {
                 slideIntoContainer(
                     AnimatedContentTransitionScope.SlideDirection.Left,
@@ -387,10 +391,12 @@ fun NavigationPage(
                     AnimatedContentTransitionScope.SlideDirection.Left,
                     animationSpec = tween(durationMillis = 300)
                 )
-            }
-        ) {
+            },
+            arguments = listOf(navArgument("groupId") { type = NavType.StringType })
+        ) { backStackEntry ->
             onBottomBarVisibilityChange(false)
-            GroupDetailsPage()
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            GroupDetailsPage(groupId)
         }
     }
 }

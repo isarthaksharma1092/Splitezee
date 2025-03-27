@@ -23,8 +23,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,8 +36,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDataClass
+import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDetailDataClass
 import com.isarthaksharma.splitezee.viewModel.ViewModelFireStore
 import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDB
+import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDetail
+import java.util.UUID
 import java.util.regex.Pattern
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -48,44 +49,25 @@ import java.util.regex.Pattern
 fun CreateGroup(
     onDismiss: () -> Unit,
     viewModelGroupDB: ViewModelGroupDB = hiltViewModel(),
+    viewModelGroupDetail: ViewModelGroupDetail = hiltViewModel(),
     viewModelFireStoreUpload: ViewModelFireStore = hiltViewModel()
 ) {
-    var isEmailExists by remember { mutableStateOf<Boolean?>(null) }
-
     var groupName by remember { mutableStateOf("") }
     var memberEmail by remember { mutableStateOf("") }
     val selectedMembers = remember { mutableStateListOf<String>() }
     val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: ""
     val context = LocalContext.current
 
-    LaunchedEffect(viewModelFireStoreUpload.emailExists.collectAsState().value) {
-        isEmailExists = viewModelFireStoreUpload.emailExists.value
-        if (isEmailExists == true) {
-            val email = memberEmail.trim()
-            if (email.isNotEmpty() && email != currentUserEmail && !selectedMembers.contains(email)) {
-                selectedMembers.add(email)
-                memberEmail = ""
-            }
-        }
-        else Toast.makeText(context, "No User Found !", Toast.LENGTH_SHORT).show()
-    }
-    LaunchedEffect(Unit) {
-        if (!selectedMembers.contains(currentUserEmail)) {
-            selectedMembers.add(currentUserEmail)
-        }
-    }
-
+    // ~~ UI
     ModalBottomSheet(onDismissRequest = { onDismiss() }) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+            modifier = Modifier.fillMaxWidth().padding(16.dp)
         ) {
             Text("Create Group", style = MaterialTheme.typography.headlineSmall)
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Add Group Name *************************
+            // ***************** Add Group Name *****************
             TextField(
                 value = groupName,
                 onValueChange = { groupName = it },
@@ -95,7 +77,7 @@ fun CreateGroup(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Add Members Text *************************
+            // ***************** Add Members Text *****************
             Text(
                 "Add Members",
                 style = MaterialTheme.typography.titleMedium,
@@ -103,7 +85,7 @@ fun CreateGroup(
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Add Members Text field *************************
+            // ***************** Add Members Text field *****************
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -118,13 +100,30 @@ fun CreateGroup(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
+                // ***************** Add Members *****************
                 Button(
                     onClick = {
-                        val email = memberEmail.trim()
-                        if (isValidEmail(email)) viewModelFireStoreUpload.checkEmail(email)
-                        else Toast.makeText(context,"Enter a valid Email Address",Toast.LENGTH_SHORT).show()
+                        val email = memberEmail.trim().lowercase()
+                        if (isValidEmail(email)) {
+                            if (!selectedMembers.contains(currentUserEmail))
+                            {
+                                selectedMembers.add(currentUserEmail)
+                            }
+                            else if (!selectedMembers.contains(currentUserEmail))
+                            {
+                                Toast.makeText(context, "Email Already Added !", Toast.LENGTH_SHORT).show()
+                            }
+                            else{
+                                selectedMembers.add(email)
+                                memberEmail = ""
+                            }
+                        }
+                        else Toast.makeText(context, "Enter a valid Email Address", Toast.LENGTH_SHORT).show()
                     },
-                    enabled = memberEmail.trim().isNotEmpty() && !selectedMembers.contains(memberEmail.trim())
+
+                    enabled = memberEmail.trim().isNotEmpty() && !selectedMembers.contains(
+                        memberEmail.trim()
+                    )
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Add Member")
                 }
@@ -132,9 +131,8 @@ fun CreateGroup(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Show Added Members *************************
+            // ***************** Show Added Members *****************
             if (selectedMembers.size > 1) {
-
                 Column {
                     Text("Members Added:", style = MaterialTheme.typography.titleMedium)
 
@@ -145,7 +143,15 @@ fun CreateGroup(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(text = member, modifier = Modifier.weight(1f))
-                            if (member == currentUserEmail) { Icon(Icons.Default.AdminPanelSettings, contentDescription = "Admin") }
+                            if (member == currentUserEmail) {
+                                IconButton(onClick = { }) {
+                                    Icon(
+                                        Icons.Default.AdminPanelSettings,
+                                        contentDescription = "Admin"
+                                    )
+                                }
+                            }
+
                             if (member != currentUserEmail) {
                                 IconButton(onClick = { selectedMembers.remove(member) }) {
                                     Icon(Icons.Default.Close, contentDescription = "Remove Member")
@@ -157,26 +163,34 @@ fun CreateGroup(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
+            // ***************** Create Group Button *****************
             Button(
                 onClick = {
-                    if (groupName.isNotEmpty())
-                    {
-                        if (selectedMembers.size > 1)
-                        {
+                    if (groupName.isNotEmpty()) {
+                        if (selectedMembers.size > 1) {
+                            val randomExpenseID = UUID.randomUUID().toString()
+
                             val groupDB = GroupDataClass(
+                                groupId  = randomExpenseID,
                                 groupName = groupName,
                                 groupAdmin = currentUserEmail,
                                 groupMembers = selectedMembers,
                                 syncStatus = false,
-                                groupCreationData = System.currentTimeMillis()
+                                groupCreationData = System.currentTimeMillis(),
+                            )
+                            val groupDetailDB = GroupDetailDataClass(
+                                groupDetailID = randomExpenseID,
+                                groupName = groupName,
+                                groupAdmin = currentUserEmail,
+                                groupCreateDate = System.currentTimeMillis(),
+                                totalExpense = 0.0,
+                                yourShare = 0.0
                             )
                             viewModelGroupDB.createGroup(groupDB)
-                            viewModelFireStoreUpload.groups
+                            viewModelGroupDetail.insertGroup(groupDetailDB)
                             onDismiss()
-                        }
-                        else Toast.makeText(context, "Add at least one member", Toast.LENGTH_SHORT).show()
-                    }
-                    else Toast.makeText(context, "You forgot to add Group Name", Toast.LENGTH_SHORT).show()
+                        } else Toast.makeText(context, "Add at least one member", Toast.LENGTH_SHORT).show()
+                    } else Toast.makeText(context, "You forgot to add Group Name", Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = groupName.isNotEmpty() && selectedMembers.size > 1
@@ -187,9 +201,11 @@ fun CreateGroup(
     }
 }
 
+// ***************** Email Pattern *****************
 fun isValidEmail(str: String): Boolean {
     val emailPattern = Pattern.compile(
         "[A-Za-z0-9+_.-]+@gmail.com"
     )
     return emailPattern.matcher(str).matches()
 }
+

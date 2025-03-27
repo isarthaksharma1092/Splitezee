@@ -2,6 +2,7 @@ package com.isarthaksharma.splitezee.appScreen
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,13 +15,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material3.Button
@@ -49,169 +48,175 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.isarthaksharma.splitezee.R
 import com.isarthaksharma.splitezee.ui.uiComponents.AnimatedLiquidFAB
 import com.isarthaksharma.splitezee.ui.uiComponents.ExpenseShowCard
+import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDetail
 import com.isarthaksharma.splitezee.viewModel.ViewModelPersonalDB
 
-//@Preview(showSystemUi = true)
 @OptIn(
     ExperimentalMaterial3ExpressiveApi::class,
     ExperimentalMaterial3Api::class,
     ExperimentalLayoutApi::class
 )
+
 @Composable
 fun GroupDetailsPage(
-    viewModelPersonalDB: ViewModelPersonalDB = hiltViewModel(),
+    groupId: String,
+    viewModelGroupDetail: ViewModelGroupDetail = hiltViewModel(),
+    viewModelPersonalDB: ViewModelPersonalDB = hiltViewModel()
 ) {
-    val expenses by viewModelPersonalDB.expenses.collectAsState()
-    data class GroupMember(
-        val name: String,
-        val email: String
-    )
+    val gradientColors = if (isSystemInDarkTheme()) {
+        listOf(
+            Color(0xFF1A237E), // Deep Blue
+            Color(0xFF9575CD), // Soft Purple
+            Color(0xFF000000)  // Black for depth
+        )
+    } else {
+        listOf(
+            Color(0xFF64B5F6), // Light Blue
+            Color(0xFF9575CD), // Soft Purple
+            Color(0xFFFFFFFF)  // White for clarity
+        )
+    }
+    // Updated Header Card Color
+    val headerCardColor = if (isSystemInDarkTheme()) {
+        Color(0xFF2E3B55).copy(alpha = 0.6f)
+    } else {
+        Color(0xFFE3F2FD).copy(alpha = 0.6f)
+    }
 
-    val demoGroupMembers = listOf(
-        GroupMember(name = "Sarthak Sharma", email = "sarthak@example.com"),
-        GroupMember(name = "Aditi Verma", email = "aditi@example.com"),
-        GroupMember(name = "Rohan Mehta", email = "rohan@example.com"),
-        GroupMember(name = "Neha Kapoor", email = "neha@example.com"),
-        GroupMember(name = "Aman Gupta", email = "aman@example.com")
-    )
+    val groupDetailPage by viewModelGroupDetail.getGroupDetails(groupId).collectAsState(initial = null)
+    val expenses by viewModelPersonalDB.expenses.collectAsState()
+
     val isSyncing = false
     val context = LocalContext.current
     var isEditSheetOpen by rememberSaveable { mutableStateOf(false) }
-    val cardColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.2f)
-    val color:Color =  MaterialTheme.colorScheme.onTertiaryContainer
-    // ~~~~~ UI
-    Box {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Brush.verticalGradient(colors = listOf(Color(0xFF027506),Color(0xFF000000))))
-        ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                // ******** Header
-                Card(
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Brush.verticalGradient(colors = gradientColors))
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+
+            // ****************** HEADER ******************
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(bottomStart = 25.dp, bottomEnd = 25.dp)),
+                colors = CardDefaults.cardColors(containerColor = headerCardColor)
+            ) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(bottomStart = 25.dp, bottomEnd = 25.dp)),
-                    colors = CardDefaults.cardColors(containerColor = cardColor)
+                        .padding(top = 40.dp,start = 10.dp,end = 10.dp, bottom = 10.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 10.dp)
-                            .wrapContentHeight()
+                    // ***** Top Bar *****
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
+                        Text(
+                            text = "Group Details",
+                            fontFamily = FontFamily(Font(R.font.nabla_heading)),
+                            style = MaterialTheme.typography.displaySmallEmphasized,
+                            textAlign = TextAlign.Center,
+                        )
+                        Icon(
+                            if (isSyncing) Icons.Default.CloudDone else Icons.Default.CloudUpload,
+                            contentDescription = "Sync Status",
+                            tint = if (isSyncing) Color.Green else Color.Red
+                        )
+                    }
 
-                            // ****************** Heading
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 50.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                                Icon(
-                                    Icons.AutoMirrored.Filled.ArrowBackIos,
-                                    contentDescription = "Back Button",
-                                    tint = MaterialTheme.colorScheme.background,
-                                )
-                                Text(
-                                    "Group Details",
-                                    fontFamily = FontFamily(Font(R.font.doto)),
-                                    color = MaterialTheme.colorScheme.background,
-                                    style = MaterialTheme.typography.displaySmallEmphasized,
-                                    textAlign = TextAlign.Center,
-                                )
-                                Icon(
-                                    if (isSyncing) Icons.Default.CloudDone else Icons.Default.CloudUpload,
-                                    contentDescription = "Sync Status",
-                                    tint = if (isSyncing) Color.Green else Color.Red,
-                                )
-                            }
+                    // ***** Group Name & Creation Date *****
+                    Text(
+                        ".Trip to Jaipur",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        textAlign = TextAlign.Start,
+                        style = MaterialTheme.typography.headlineMediumEmphasized,
+                        fontFamily = FontFamily(Font(R.font.doto))
+                    )
 
-                            Spacer(modifier = Modifier.height(20.dp))
+                    Text(
+                        "Created on : 10/20/2025",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Start,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
+                        style = MaterialTheme.typography.labelMediumEmphasized,
+                        fontFamily = FontFamily(Font(R.font.doto))
+                    )
 
-                            // ****************** Title of the Group
-                            Text(
-                                "Trip to Jaipur",
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.fillMaxWidth(),
-                                color = MaterialTheme.colorScheme.background,
-                                textAlign = TextAlign.Start,
-                                style = MaterialTheme.typography.headlineMediumEmphasized,
-                                fontFamily = FontFamily(Font(R.font.doto))
-                            )
-                            // ****************** Group Creation
-                            Text(
-                                "Created on : 10/20/2025",
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Start,
-                                color = MaterialTheme.colorScheme.background,
-                                style = MaterialTheme.typography.labelMediumEmphasized,
-                                fontFamily = FontFamily(Font(R.font.doto))
-                            )
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                            Spacer(modifier = Modifier.height(20.dp))
-
-                            //  ****************** List Showing Name and Image
-                            FlowRow(
-                                verticalArrangement = Arrangement.spacedBy(5.dp),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                demoGroupMembers.forEach { member ->
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Box(
-                                            modifier = Modifier.size(48.dp).clip(CircleShape).background(Color.Gray),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(member.name.first().toString(), color = Color.White)
-                                        }
-                                        Text(member.name.split(" ")[0], fontSize = 12.sp,color = MaterialTheme.colorScheme.background)
-                                    }
+                    // ***** Group Members (Avatars + Names) *****
+                    FlowRow(
+                        verticalArrangement = Arrangement.spacedBy(5.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        listOf("Sarthak", "Aditi", "Rohan", "Neha", "Aman").forEach { memberName ->
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF64B5F6)), // Light Blue Avatar
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        memberName.first().toString(),
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
                                 }
-                            }
-
-                            Spacer(modifier = Modifier.height(20.dp))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
                                 Text(
-                                    "Total Expense: ₹ 3,500",
-                                    style = MaterialTheme.typography.bodyLargeEmphasized,
-                                    overflow = TextOverflow.Ellipsis,
-                                    color = MaterialTheme.colorScheme.background,
-                                )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    "Your Share: ₹ 500",
-                                    style = MaterialTheme.typography.bodyLargeEmphasized,
-                                    overflow = TextOverflow.Ellipsis,
-                                    color = MaterialTheme.colorScheme.background,
+                                    text = memberName,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    fontSize = 12.sp,
                                 )
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // ***** Expenses Summary *****
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            "Total Expense: ₹ 3,500",
+                            style = MaterialTheme.typography.bodyLargeEmphasized,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                        Text(
+                            "Your Share: ₹ 500",
+                            style = MaterialTheme.typography.bodyLargeEmphasized,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
                 }
             }
-            // Other content
-            // **Expense List**
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ****************** EXPENSE LIST ******************
+            // Temporary [Testing Purpose]
             LazyColumn(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(expenses) { expense ->
@@ -227,7 +232,7 @@ fun GroupDetailsPage(
         }
 
         // ******** Floating Action Button
-        Box(modifier = Modifier.padding(bottom = 30.dp)){
+        Box(modifier = Modifier.padding(bottom = 30.dp)) {
             AnimatedLiquidFAB(
                 onShareClick = { Toast.makeText(context, "Share", Toast.LENGTH_SHORT).show() },
                 onAddMemberClick = {
@@ -238,8 +243,9 @@ fun GroupDetailsPage(
                 }
             )
         }
-
     }
+
+    // ****************** Edit Group Modal ******************
     if (isEditSheetOpen) {
         ModalBottomSheet(onDismissRequest = { isEditSheetOpen = false }) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -248,7 +254,8 @@ fun GroupDetailsPage(
                 TextField(
                     value = "Trip to Jaipur",
                     onValueChange = {},
-                    label = { Text("Group Name") })
+                    label = { Text("Group Name") }
+                )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = { isEditSheetOpen = false }) {
                     Text("Save Changes")

@@ -1,8 +1,7 @@
 package com.isarthaksharma.splitezee.ui.uiComponents
 
 import android.annotation.SuppressLint
-import android.widget.Toast
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,39 +25,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDataClass
-import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDB
-import dagger.hilt.android.lifecycle.HiltViewModel
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @SuppressLint("DefaultLocale")
 @Composable
 fun GroupItem(
+    groupID: String,
     groupName: String,
-    groupAdmin: String,
     groupMembers: List<String>,
     totalExpense: Double,
     personalBalance: Double,
-    groupDetails:()->Unit
+    groupDetails: (String) -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-            .shadow(6.dp, RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 10.dp)),
+            .border(
+                1.dp,
+                color = MaterialTheme.colorScheme.tertiary,
+                shape = RoundedCornerShape(20.dp)
+            )
+            .clip(RoundedCornerShape(20.dp)),
+
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
-        onClick = {
-            groupDetails()
-        }
+        onClick = { groupDetails(groupID) }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .shadow(5.dp)
                 .padding(16.dp)
         ) {
             // Group Name & Members Count
@@ -109,7 +108,12 @@ fun GroupItem(
                         color = Color.Gray
                     )
                     Text(
-                        text = if (personalBalance >= 0) "+₹${String.format("%,.2f", personalBalance)}"
+                        text = if (personalBalance >= 0) "+₹${
+                            String.format(
+                                "%,.2f",
+                                personalBalance
+                            )
+                        }"
                         else "-₹${String.format("%,.2f", -personalBalance)}",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
@@ -118,5 +122,12 @@ fun GroupItem(
                 }
             }
         }
+
+        Text(
+            text = "GroupID : $groupID",
+            color = Color.Gray,
+            modifier = Modifier.align(Alignment.End)
+        )
+
     }
 }
