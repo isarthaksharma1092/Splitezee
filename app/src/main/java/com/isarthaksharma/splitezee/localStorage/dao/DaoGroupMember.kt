@@ -10,23 +10,18 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DaoGroupMember {
-    // Fetch All group Member
-    @Query("SELECT * FROM GroupMemberDataClass")
-    fun getAllMembers(): Flow<List<GroupMemberDataClass>>
+    @Query("SELECT * FROM group_members WHERE groupId = :groupId")
+    fun getMembersByGroupId(groupId: String): Flow<List<GroupMemberDataClass>>
 
-    // Update Info of Existing User
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMember(member: GroupMemberDataClass)
+
     @Update
     suspend fun updateMembers(groupMember: GroupMemberDataClass)
 
-    // Add Members
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertGroup(group: GroupMemberDataClass)
+    @Query("DELETE FROM group_members WHERE groupId = :groupId AND email = :email")
+    suspend fun removeMember(groupId: String, email: String)
 
-    // Delete Members
-    @Query("DELETE FROM GroupMemberDataClass WHERE userId = :userId")
-    suspend fun deleteMember(userId: String)
-
-    // Delete All Member (Only in case of Group Delete)
-    @Query("DELETE FROM GroupMemberDataClass")
-    suspend fun deleteAllGroups()
+    @Query("DELETE FROM group_members WHERE groupId = :groupId")
+    suspend fun deleteAllMembersFromGroup(groupId: String)
 }

@@ -1,6 +1,5 @@
 package com.isarthaksharma.splitezee.repository
 
-import android.util.Log
 import com.isarthaksharma.splitezee.localStorage.dataBase.SplitezeeDatabase
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDetailDataClass
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupExpenseDataClass
@@ -14,7 +13,6 @@ class RepositoryGroupDetail @Inject constructor(
     // ****************** GROUP DETAILS ******************
 
     fun getGroupDetailById(groupDetailID: String): Flow<GroupDetailDataClass> {
-        Log.d("DEBUG", "All groups in DB Repository: $groupDetailID")
         return db.daoGroupDetails().getGroupDetails(groupDetailID)
     }
 
@@ -36,24 +34,24 @@ class RepositoryGroupDetail @Inject constructor(
 
     // ****************** GROUP MEMBERS ******************
 
-    fun getAllMembers(): Flow<List<GroupMemberDataClass>> {
-        return db.daoGroupMember().getAllMembers()
+    fun getMembersByGroupId(groupId: String): Flow<List<GroupMemberDataClass>> {
+        return db.daoGroupMember().getMembersByGroupId(groupId)
     }
 
     suspend fun insertMember(member: GroupMemberDataClass) {
-        db.daoGroupMember().insertGroup(member)
+        db.daoGroupMember().insertMember(member)
     }
 
     suspend fun updateMember(member: GroupMemberDataClass) {
         db.daoGroupMember().updateMembers(member)
     }
 
-    suspend fun deleteMember(userId: String) {
-        db.daoGroupMember().deleteMember(userId)
+    suspend fun deleteMember(userId: String, email:String) {
+        db.daoGroupMember().removeMember(userId, email)
     }
 
-    suspend fun deleteAllMembers() {
-        db.daoGroupMember().deleteAllGroups()
+    suspend fun deleteAllMembers(userId:String) {
+        db.daoGroupMember().deleteAllMembersFromGroup(userId)
     }
 
     // ****************** GROUP EXPENSES ******************

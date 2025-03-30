@@ -19,10 +19,4 @@ class RepositoryGroupDB @Inject constructor(private val daoGroup: DaoGroup){
         return daoGroup.deleteGroup(groupInfo)
     }
 
-    suspend fun addMemberToGroup(groupId:Int,newMembers:List<String>){
-        val group = daoGroup.getGroupById(groupId) ?: return
-        val updatedMembers = group.groupMembers.toMutableList().apply { addAll(newMembers) }
-        val updatedGroup = group.copy(groupMembers = updatedMembers)
-        daoGroup.updateGroup(updatedGroup)
-    }
 }

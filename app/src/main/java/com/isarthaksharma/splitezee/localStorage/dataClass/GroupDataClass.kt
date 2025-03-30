@@ -10,6 +10,5 @@ data class GroupDataClass(
     val groupName: String,
     val groupAdmin:String,
     val groupCreationData:Long,
-    val groupMembers:List<String>,
     val syncStatus: Boolean = false
 )

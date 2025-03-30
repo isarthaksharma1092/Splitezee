@@ -34,12 +34,6 @@ class ViewModelGroupDB @Inject constructor(private val repositoryGroupDB: Reposi
         }
     }
 
-    fun addMember(groupId: Int, memberNameList: List<String>) {
-        viewModelScope.launch {
-            repositoryGroupDB.addMemberToGroup(groupId, memberNameList)
-        }
-    }
-
     fun createGroup(groupInfo: GroupDataClass) {
         viewModelScope.launch {
             repositoryGroupDB.createGroup(groupInfo)

@@ -9,14 +9,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,7 +30,6 @@ import androidx.compose.ui.unit.dp
 fun GroupItem(
     groupID: String,
     groupName: String,
-    groupMembers: List<String>,
     totalExpense: Double,
     personalBalance: Double,
     groupDetails: (String) -> Unit
@@ -70,11 +65,11 @@ fun GroupItem(
                     fontWeight = FontWeight.Bold,
                     overflow = TextOverflow.Ellipsis
                 )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.People, contentDescription = "Members")
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = "${groupMembers.size}", fontWeight = FontWeight.SemiBold)
-                }
+//                Row(verticalAlignment = Alignment.CenterVertically) {
+//                    Icon(Icons.Default.People, contentDescription = "Members")
+//                    Spacer(modifier = Modifier.width(4.dp))
+//                    Text(text = "${groupMembers.size}", fontWeight = FontWeight.SemiBold)
+//                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))

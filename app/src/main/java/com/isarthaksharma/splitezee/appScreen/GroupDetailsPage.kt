@@ -30,7 +30,10 @@ import com.isarthaksharma.splitezee.R
 import com.isarthaksharma.splitezee.ui.uiComponents.AnimatedLiquidFAB
 import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDetail
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalLayoutApi::class
+)
 @Composable
 fun GroupDetailsPage(
     viewModelGroupDetail: ViewModelGroupDetail = hiltViewModel(),
@@ -39,6 +42,7 @@ fun GroupDetailsPage(
 ) {
     LaunchedEffect(groupId) {
         viewModelGroupDetail.fetchGroupDetails(groupId)
+        viewModelGroupDetail.getMembersByGroupId(groupId)
     }
 
     val gradientColors = if (isSystemInDarkTheme()) { listOf(Color(0xFF1A237E), Color(0xFF9575CD), Color(0xFF000000)) }
@@ -51,6 +55,8 @@ fun GroupDetailsPage(
     val groupDetailPage by viewModelGroupDetail.groupDetails.collectAsState()
     val context = LocalContext.current
     var isEditSheetOpen by rememberSaveable { mutableStateOf(false) }
+
+    val groupMembers by viewModelGroupDetail.groupMembers.collectAsState()
 
     Box(
         modifier = Modifier
@@ -72,6 +78,7 @@ fun GroupDetailsPage(
                         .fillMaxWidth()
                         .padding(top = 40.dp, start = 10.dp, end = 10.dp, bottom = 10.dp)
                 ) {
+
                     // ***** Top Bar *****
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -127,12 +134,10 @@ fun GroupDetailsPage(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            listOf(
-                                "Sarthak", "Aditi", "Rohan", "Neha", "Aman"
-                            ).forEach { memberName ->
+                            groupMembers.forEach { member ->
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Box(
                                         modifier = Modifier
@@ -142,13 +147,13 @@ fun GroupDetailsPage(
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
-                                            memberName.first().toString(),
+                                            member.displayName.first().toString(),
                                             color = Color.White,
                                             style = MaterialTheme.typography.bodyLarge
                                         )
                                     }
                                     Text(
-                                        text = memberName,
+                                        text = member.displayName,
                                         color = MaterialTheme.colorScheme.onBackground,
                                         fontSize = 12.sp,
                                     )
@@ -182,11 +187,7 @@ fun GroupDetailsPage(
                             overflow = TextOverflow.Ellipsis,
                             color = MaterialTheme.colorScheme.onBackground,
                         )
-                        Toast.makeText(
-                            context,
-                            "groupDetailPage?.totalExpense ?: 0.0",
-                            Toast.LENGTH_SHORT
-                        ).show()
+
                         Text(
                             "Your Share: ₹${groupDetailPage?.yourShare ?: 0.0}",
                             style = MaterialTheme.typography.bodyLargeEmphasized,

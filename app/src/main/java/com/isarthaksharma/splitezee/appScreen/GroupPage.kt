@@ -76,7 +76,6 @@ fun GroupPage(
                     GroupItem(
                         groupID = it.groupId,
                         groupName = it.groupName,
-                        groupMembers = it.groupMembers,
                         totalExpense = 0.0,
                         personalBalance = 0.0
                     ) {groupId ->

@@ -37,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDataClass
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDetailDataClass
+import com.isarthaksharma.splitezee.localStorage.dataClass.GroupMemberDataClass
 import com.isarthaksharma.splitezee.viewModel.ViewModelFireStore
 import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDB
 import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDetail
@@ -168,26 +169,48 @@ fun CreateGroup(
                 onClick = {
                     if (groupName.isNotEmpty()) {
                         if (selectedMembers.size > 1) {
-                            val randomExpenseID = UUID.randomUUID().toString()
+                            val randomGroupID = UUID.randomUUID().toString()
 
+                            // Create the group entity
                             val groupDB = GroupDataClass(
-                                groupId  = randomExpenseID,
+                                groupId = randomGroupID,
                                 groupName = groupName,
                                 groupAdmin = currentUserEmail,
-                                groupMembers = selectedMembers,
                                 syncStatus = false,
                                 groupCreationData = System.currentTimeMillis(),
                             )
+
+                            // Create group details
                             val groupDetailDB = GroupDetailDataClass(
-                                groupDetailID = randomExpenseID,
+                                groupDetailID = randomGroupID,
                                 groupName = groupName,
                                 groupAdmin = currentUserEmail,
                                 groupCreateDate = System.currentTimeMillis(),
                                 totalExpense = 0.0,
                                 yourShare = 0.0
                             )
+
+                            // Insert into RoomDB
                             viewModelGroupDB.createGroup(groupDB)
                             viewModelGroupDetail.insertGroup(groupDetailDB)
+
+                            // Insert Members
+                            val membersList = selectedMembers.map { email ->
+                                GroupMemberDataClass(
+                                    groupId = randomGroupID,
+                                    userId = if (email == currentUserEmail) FirebaseAuth.getInstance().currentUser?.uid else null,
+                                    email = email,
+                                    displayName = email.substringBefore('@'),
+                                    profileImage = null,
+                                    registered = email == currentUserEmail
+                                )
+                            }
+
+                            // Insert members into RoomDB
+                            membersList.forEach { member ->
+                                viewModelGroupDetail.insertMember(member)
+                            }
+
                             onDismiss()
                         } else Toast.makeText(context, "Add at least one member", Toast.LENGTH_SHORT).show()
                     } else Toast.makeText(context, "You forgot to add Group Name", Toast.LENGTH_SHORT).show()
@@ -197,6 +220,7 @@ fun CreateGroup(
             ) {
                 Text("Create Group")
             }
+
         }
     }
 }

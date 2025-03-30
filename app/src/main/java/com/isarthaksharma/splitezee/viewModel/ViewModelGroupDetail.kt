@@ -26,7 +26,6 @@ class ViewModelGroupDetail @Inject constructor(
         Log.d("DEBUG", "All groups in DB: $groupId")
         viewModelScope.launch {
             repository.getGroupDetailById(groupId).collect { groupData ->
-//                Log.d("DEBUG", "All groups in DB: $groupData")
                 _groupDetails.value = groupData
             }
         }
@@ -58,11 +57,11 @@ class ViewModelGroupDetail @Inject constructor(
 
     // ****************** GROUP MEMBERS ******************
     private val _groupMembers = MutableStateFlow<List<GroupMemberDataClass>>(emptyList())
-    val groupMembers: StateFlow<List<GroupMemberDataClass>> = _groupMembers.asStateFlow()
+    val groupMembers: StateFlow<List<GroupMemberDataClass>> = _groupMembers
 
-    fun fetchAllMembers() {
+    fun getMembersByGroupId(groupId: String) {
         viewModelScope.launch {
-            repository.getAllMembers().collect { members ->
+            repository.getMembersByGroupId(groupId).collect { members ->
                 _groupMembers.value = members
             }
         }
@@ -71,28 +70,28 @@ class ViewModelGroupDetail @Inject constructor(
     fun insertMember(member: GroupMemberDataClass) {
         viewModelScope.launch {
             repository.insertMember(member)
-            fetchAllMembers()
+//            fetchAllMembers()
         }
     }
 
     fun updateMember(member: GroupMemberDataClass) {
         viewModelScope.launch {
             repository.updateMember(member)
-            fetchAllMembers()
+//            fetchAllMembers()
         }
     }
 
-    fun deleteMember(userId: String) {
+    fun deleteMember(userId: String,email: String) {
         viewModelScope.launch {
-            repository.deleteMember(userId)
-            fetchAllMembers()
+            repository.deleteMember(userId, email)
+//            fetchAllMembers()
         }
     }
 
-    fun deleteAllMembers() {
+    fun deleteAllMembers(userId: String) {
         viewModelScope.launch {
-            repository.deleteAllMembers()
-            fetchAllMembers()
+            repository.deleteAllMembers(userId)
+//            fetchAllMembers()
         }
     }
 

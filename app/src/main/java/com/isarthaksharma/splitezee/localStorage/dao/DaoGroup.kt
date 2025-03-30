@@ -5,7 +5,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDataClass
 import kotlinx.coroutines.flow.Flow
 
@@ -22,10 +21,4 @@ interface DaoGroup {
 
     @Delete
     suspend fun deleteGroup(groupInfo: GroupDataClass)
-
-    @Update
-    suspend fun updateGroup(groupInfo: GroupDataClass)
-
-    @Query("UPDATE GroupDataClass SET groupMembers = :members WHERE groupId = :groupId")
-    suspend fun addMemberToGroup(groupId: Int, members: List<String>)
 }
