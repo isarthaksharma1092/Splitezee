@@ -146,7 +146,6 @@ fun FinancePage(
                             lastUpdated = convertLongToDate(sms.lastUpdated),
                             accountNumber = sms.accountNumber,
                             bankName = sms.bankName,
-                            bankLogo = R.drawable.icon_bob
                         )
                     }
                 }

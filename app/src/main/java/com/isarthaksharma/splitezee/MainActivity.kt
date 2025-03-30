@@ -52,6 +52,7 @@ import androidx.navigation.navArgument
 import com.isarthaksharma.splitezee.appScreen.FinancePage
 import com.isarthaksharma.splitezee.appScreen.GroupDetailsPage
 import com.isarthaksharma.splitezee.appScreen.GroupPage
+import com.isarthaksharma.splitezee.appScreen.GroupSettingPage
 import com.isarthaksharma.splitezee.appScreen.HomePage
 import com.isarthaksharma.splitezee.appScreen.LoginPage
 import com.isarthaksharma.splitezee.appScreen.SettingPage
@@ -85,20 +86,21 @@ fun MainScreen() {
     var showBottomBar by rememberSaveable { mutableStateOf(false) }
     var selectedBottomNavBar by rememberSaveable { mutableStateOf("") }
 
-    // App Background Color
+    // App Background Gradient Design
     val gradientColors = if (isSystemInDarkTheme()) {
         listOf(
-            Color(0xFF56C2F2).copy(alpha = 0.4f),
-            Color(0xFF56C2F2).copy(alpha = 0.2f),
-            Color.Black
+            Color(0xFF141E30), // Dark blue
+            Color(0xFF243B55)  // Darker blue-green
         )
+
     } else {
         listOf(
-            Color(0xFF56C2F2).copy(alpha = 0.4f),
-            Color(0xFF56C2F2).copy(alpha = 0.2f),
-            Color.White,
+            Color(0xFFE0F2F7), // Very light blue
+            Color(0xFFB2DFDB)  // Light green-blue
         )
+
     }
+
 
     // Color Invert to Background Color
     val colorInvert: Color = if (isSystemInDarkTheme()) {
@@ -117,10 +119,10 @@ fun MainScreen() {
                         .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                         .background(
                             Brush.verticalGradient(
-                                colors = listOf
-                                    (
-                                    Color(0xFF58ACF1).copy(alpha = 0.2f),
-                                    Color(0xFF58ACF1).copy(alpha = 0.5f)
+                                colors = listOf(
+                                    Color(0xFF4FC3F7).copy(alpha = 0.6f), // Brighter blue
+                                    Color(0xFF81D4FA).copy(alpha = 0.8f),
+                                    Color(0xFF64B5F6)
                                 )
                             )
                         )
@@ -354,7 +356,7 @@ fun NavigationPage(
             GroupPage(
                 modifier
             ) {
-                navController.navigate("${NavigationUtility.GroupDetailsPage}/$it.groupId")
+                navController.navigate("${NavigationUtility.GroupDetailsPage}/$it")
             }
         }
 
@@ -396,7 +398,28 @@ fun NavigationPage(
         ) { backStackEntry ->
             onBottomBarVisibilityChange(false)
             val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
-            GroupDetailsPage(groupId)
+            GroupDetailsPage(groupId = groupId) {
+                navController.navigate(NavigationUtility.GroupSettingPage)
+            }
+        }
+
+        composable(
+            route = NavigationUtility.GroupSettingPage,
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(durationMillis = 300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(durationMillis = 300)
+                )
+            }
+        ) {
+            onBottomBarVisibilityChange(false)
+            GroupSettingPage()
         }
     }
 }

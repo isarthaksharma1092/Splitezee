@@ -39,8 +39,7 @@ fun CardDesign(
     availableBalance: String,
     lastUpdated: String,
     accountNumber: String,
-    bankName: String,
-    bankLogo: Int
+    bankName: String
 ) {
     var isVisible by remember { mutableStateOf(false) }
 

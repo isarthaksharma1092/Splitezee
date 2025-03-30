@@ -1,11 +1,10 @@
 package com.isarthaksharma.splitezee.repository
 
-import android.content.Context
+import android.util.Log
 import com.isarthaksharma.splitezee.localStorage.dataBase.SplitezeeDatabase
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDetailDataClass
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupExpenseDataClass
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupMemberDataClass
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -14,7 +13,8 @@ class RepositoryGroupDetail @Inject constructor(
 ) {
     // ****************** GROUP DETAILS ******************
 
-    fun getGroupDetailById(groupDetailID: String): Flow<GroupDetailDataClass?> {
+    fun getGroupDetailById(groupDetailID: String): Flow<GroupDetailDataClass> {
+        Log.d("DEBUG", "All groups in DB Repository: $groupDetailID")
         return db.daoGroupDetails().getGroupDetails(groupDetailID)
     }
 

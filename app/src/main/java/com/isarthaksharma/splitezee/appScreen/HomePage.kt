@@ -85,7 +85,7 @@ fun HomePage(
     val sheetState = rememberModalBottomSheetState()
     var isPersonalSheetOpen by rememberSaveable { mutableStateOf(false) }
 
-    val cardColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
+    val cardColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f)
     var openDelAlert by remember { mutableStateOf(false) }
     var selectedExpense by remember { mutableStateOf<PersonalDataClass?>(null) }
     var openEditDialog by remember { mutableStateOf(false) }
@@ -126,7 +126,7 @@ fun HomePage(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(180.dp)
-                    .padding(bottom = 10.dp),
+                    .padding(bottom = 10.dp)
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -148,13 +148,13 @@ fun HomePage(
                                 text = "Total Spent",
                                 color = MaterialTheme.colorScheme.onBackground,
                                 style = MaterialTheme.typography.headlineSmallEmphasized,
-                                fontFamily = FontFamily(Font(R.font.doto)),
+                                fontFamily = FontFamily(Font(R.font.roboto_flex)),
                             )
                             Text(
                                 text = "₹ ${totalExpense ?: 0}",
                                 color = MaterialTheme.colorScheme.onBackground,
                                 style = MaterialTheme.typography.headlineMediumEmphasized,
-                                fontFamily = FontFamily(Font(R.font.doto)),
+                                fontFamily = FontFamily(Font(R.font.roboto_flex)),
                             )
                         }
 
@@ -176,13 +176,13 @@ fun HomePage(
                                 text = "Today",
                                 color = MaterialTheme.colorScheme.onBackground,
                                 style = MaterialTheme.typography.headlineSmallEmphasized,
-                                fontFamily = FontFamily(Font(R.font.doto)),
+                                fontFamily = FontFamily(Font(R.font.roboto_flex)),
                             )
                             Text(
                                 text = "₹ ${todayExpense ?: 0}",
                                 color = MaterialTheme.colorScheme.onBackground,
                                 style = MaterialTheme.typography.headlineMediumEmphasized,
-                                fontFamily = FontFamily(Font(R.font.doto)),
+                                fontFamily = FontFamily(Font(R.font.roboto_flex)),
                             )
                             HorizontalDivider(
                                 modifier = Modifier
@@ -194,13 +194,13 @@ fun HomePage(
                                 text = "Monthly",
                                 color = MaterialTheme.colorScheme.onBackground,
                                 style = MaterialTheme.typography.headlineSmallEmphasized,
-                                fontFamily = FontFamily(Font(R.font.doto)),
+                                fontFamily = FontFamily(Font(R.font.roboto_flex)),
                             )
                             Text(
                                 text = "₹ ${monthExpense ?: 0}",
                                 color = MaterialTheme.colorScheme.onBackground,
                                 style = MaterialTheme.typography.headlineMediumEmphasized,
-                                fontFamily = FontFamily(Font(R.font.doto)),
+                                fontFamily = FontFamily(Font(R.font.roboto_flex)),
                             )
                         }
                     }
@@ -319,7 +319,7 @@ fun HomePage(
                 )
                 Text(
                     text = "Add Expense",
-                    modifier = Modifier.padding(horizontal = 5.dp),
+                    modifier = Modifier.padding(horizontal = 5.dp).align(Alignment.CenterVertically),
                     textAlign = TextAlign.Center
                 )
             }

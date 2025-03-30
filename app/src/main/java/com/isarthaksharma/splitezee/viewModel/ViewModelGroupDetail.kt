@@ -1,5 +1,6 @@
 package com.isarthaksharma.splitezee.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDetailDataClass
@@ -7,7 +8,6 @@ import com.isarthaksharma.splitezee.localStorage.dataClass.GroupExpenseDataClass
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupMemberDataClass
 import com.isarthaksharma.splitezee.repository.RepositoryGroupDetail
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,9 +19,17 @@ class ViewModelGroupDetail @Inject constructor(
     private val repository: RepositoryGroupDetail
 ) : ViewModel() {
     // ****************** GROUP DETAILS *****************
+    private val _groupDetails = MutableStateFlow<GroupDetailDataClass?>(null)
+    val groupDetails: StateFlow<GroupDetailDataClass?> = _groupDetails
 
-    fun getGroupDetails(groupId: String): Flow<GroupDetailDataClass?> {
-        return repository.getGroupDetailById(groupId)
+    fun fetchGroupDetails(groupId: String) {
+        Log.d("DEBUG", "All groups in DB: $groupId")
+        viewModelScope.launch {
+            repository.getGroupDetailById(groupId).collect { groupData ->
+//                Log.d("DEBUG", "All groups in DB: $groupData")
+                _groupDetails.value = groupData
+            }
+        }
     }
 
     fun insertGroup(group: GroupDetailDataClass) {

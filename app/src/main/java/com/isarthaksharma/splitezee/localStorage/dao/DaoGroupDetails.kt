@@ -13,7 +13,7 @@ interface DaoGroupDetails {
 
     // Get Particular Group Details
     @Query("SELECT * FROM GroupDetailDataClass WHERE groupDetailID = :groupId")
-    fun getGroupDetails(groupId: String): Flow<GroupDetailDataClass?>
+    fun getGroupDetails(groupId: String): Flow<GroupDetailDataClass>
 
     // Insert into GroupDetail DB
     @Insert(onConflict = OnConflictStrategy.REPLACE)

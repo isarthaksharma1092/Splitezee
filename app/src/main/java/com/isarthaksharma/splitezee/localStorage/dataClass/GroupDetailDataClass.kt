@@ -6,10 +6,10 @@ import androidx.room.PrimaryKey
 @Entity
 data class GroupDetailDataClass(
     @PrimaryKey
-    var groupDetailID: String = "",
-    var groupName:String = "",
-    var groupAdmin:String = "",
-    val groupCreateDate: Long = 0L,
+    var groupDetailID: String,
+    var groupName:String,
+    var groupAdmin:String,
+    val groupCreateDate: Long,
     var groupMemberDataClass: List<GroupMemberDataClass> = emptyList(),
     var totalExpense: Double = 0.0,
     var yourShare: Double = 0.0,

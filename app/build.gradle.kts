@@ -19,7 +19,7 @@ android {
         minSdk = 28
         targetSdk = 35
         versionCode = 2
-        versionName = "1.7.0-beta"
+        versionName = "1.7.2-beta"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -69,9 +69,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // Material UI & lifecycle
-    implementation("androidx.compose.material3:material3:1.4.0-alpha10")
+    implementation("androidx.compose.material3:material3:1.4.0-alpha11")
     implementation("androidx.compose.material3:material3-window-size-class:1.3.1")
-    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.4.0-alpha10")
+    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.4.0-alpha11")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     // Coroutines

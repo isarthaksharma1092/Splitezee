@@ -23,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,9 +43,9 @@ fun GroupItem(
         modifier = Modifier
             .fillMaxWidth()
             .border(
-                1.dp,
+                0.5.dp,
                 color = MaterialTheme.colorScheme.tertiary,
-                shape = RoundedCornerShape(20.dp)
+                shape = RoundedCornerShape(10.dp)
             )
             .clip(RoundedCornerShape(20.dp)),
 
@@ -56,8 +55,7 @@ fun GroupItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(5.dp)
-                .padding(16.dp)
+                .padding(8.dp)
         ) {
             // Group Name & Members Count
             Row(
@@ -122,12 +120,5 @@ fun GroupItem(
                 }
             }
         }
-
-        Text(
-            text = "GroupID : $groupID",
-            color = Color.Gray,
-            modifier = Modifier.align(Alignment.End)
-        )
-
     }
 }

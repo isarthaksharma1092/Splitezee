@@ -74,13 +74,13 @@ fun SettingPage(
     Column(
         modifier = Modifier
             .background(if (isSystemInDarkTheme()) Color.Black else Color.White)
-            .padding(top = 40.dp, start = 10.dp, end = 10.dp)
+            .padding(top = 40.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = "Settings",
                 style = MaterialTheme.typography.displaySmallEmphasized,
-                fontFamily = FontFamily(Font(R.font.doto, FontWeight.ExtraBold)),
+                fontFamily = FontFamily(Font(R.font.nabla_heading, FontWeight.ExtraBold)),
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
@@ -129,7 +129,7 @@ fun SettingPage(
             modifier = Modifier
                 .fillMaxSize()
                 .background(if (isSystemInDarkTheme()) Color.Black else Color.White)
-                .padding(10.dp)
+                .padding(top = 10.dp, start = 10.dp, end = 10.dp)
         ) {
             // Sync Toggle
             Row(verticalAlignment = Alignment.CenterVertically)

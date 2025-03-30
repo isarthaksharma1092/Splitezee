@@ -61,9 +61,9 @@ fun AnimatedLiquidFAB(
                             onShareClick()
                             dismissClick.value.invoke()
                         },
-                        containerColor = MaterialTheme.colorScheme.onBackground
+                        containerColor = MaterialTheme.colorScheme.surfaceBright
                     ) {
-                        Icon(Icons.Default.Share, contentDescription = "Share")
+                        Icon(Icons.Default.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onBackground)
                     }
                 }
             }
@@ -80,9 +80,9 @@ fun AnimatedLiquidFAB(
                             onAddMemberClick()
                             dismissClick.value.invoke()
                         },
-                        containerColor = MaterialTheme.colorScheme.onBackground
+                        containerColor = MaterialTheme.colorScheme.surfaceBright
                     ) {
-                        Icon(Icons.Default.PersonAdd, contentDescription = "Add Member")
+                        Icon(Icons.Default.PersonAdd, contentDescription = "Add Member",tint = MaterialTheme.colorScheme.onBackground)
                     }
                 }
             }
@@ -97,9 +97,9 @@ fun AnimatedLiquidFAB(
                             onAddExpenseClick()
                             dismissClick.value.invoke()
                         },
-                        containerColor = MaterialTheme.colorScheme.onBackground
+                        containerColor = MaterialTheme.colorScheme.surfaceBright
                     ) {
-                        Icon(Icons.Default.RequestPage, contentDescription = "Add Expense")
+                        Icon(Icons.Default.RequestPage, contentDescription = "Add Expense",tint = MaterialTheme.colorScheme.onBackground)
                     }
                 }
             }

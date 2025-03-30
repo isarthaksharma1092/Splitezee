@@ -8,4 +8,5 @@ object NavigationUtility {
     const val LoginPage = "LoginPage"
     const val FinancePage = "FinancePage"
     const val GroupDetailsPage = "GroupDetailsPage"
+    const val GroupSettingPage = "GroupSettingPage"
 }

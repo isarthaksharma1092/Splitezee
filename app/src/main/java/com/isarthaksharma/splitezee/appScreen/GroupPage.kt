@@ -98,11 +98,11 @@ fun GroupPage(
                 Icon(
                     Icons.Default.GroupAdd,
                     contentDescription = null,
-                    modifier = Modifier.padding(horizontal = 5.dp)
+                    modifier = Modifier.padding(horizontal = 5.dp).align(Alignment.CenterVertically)
                 )
                 Text(
                     text = "Create Group",
-                    modifier = Modifier.padding(horizontal = 5.dp),
+                    modifier = Modifier.padding(horizontal = 5.dp).align(Alignment.CenterVertically),
                     textAlign = TextAlign.Center
                 )
             }
