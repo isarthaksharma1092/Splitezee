@@ -7,35 +7,56 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class RepositoryFireStore @Inject constructor(private val firestore: FirebaseFirestore) {
-
-    suspend fun getExpensesFromFireStore(userId: String): List<PersonalDataClass> {
-        return try {
-            val snapshot = firestore.collection("users")
-                .document(userId)
-                .collection("expenses")
-                .get()
-                .await()
-
-            snapshot.documents.mapNotNull { it.toObject(PersonalDataClass::class.java) }
-        } catch (e: Exception) {
-            emptyList()
-        }
+    fun fetchUserInfoByEmail(
+        email: String,
+        onResult: (Boolean, String?, String?, String?) -> Unit
+    ) {
+        FirebaseFirestore.getInstance().collection("users")
+            .whereEqualTo("email", email)
+            .get()
+            .addOnSuccessListener { result ->
+                val doc = result.documents.firstOrNull()
+                if (doc != null) {
+                    val name = doc.getString("name")
+                    val profileImage = doc.getString("profilePic")
+                    val userId = doc.getString("userId")
+                    onResult(true, name, profileImage, userId)
+                } else {
+                    onResult(false, null, null, null)
+                }
+            }
+            .addOnFailureListener {
+                onResult(false, null, null, null)
+            }
     }
 
-    suspend fun checkIfEmailExists(email: String): Boolean {
-        return try {
-            val querySnapshot = firestore.collection("users")
-                .whereEqualTo("email", email)
-                .limit(1)
-                .get()
-                .await()
+//    fun fetchUserInfoByEmail(
+//        email: String,
+//        onResult: (Boolean, String?, String?, String?) -> Unit
+//    ) {
+//        FirebaseFirestore.getInstance().collection("users")
+//            .whereEqualTo("email", email)
+//            .addSnapshotListener { value, error ->
+//                if (error != null) {
+//                    Log.e("FirestoreDebug", "Error fetching user info: ${error.message}", error)
+//                    onResult(false, null, null, null)
+//                    return@addSnapshotListener
+//                }
+//
+//                Log.d("FirestoreDebug", "Query result: ${value?.documents}")
+//
+//                val doc = value?.documents?.firstOrNull()
+//                if (doc != null) {
+//                    val name = doc.getString("name")
+//                    val profileImage = doc.getString("profilePic")
+//                    val userId = doc.getString("userId")
+//                    onResult(true, name, profileImage, userId)
+//                } else {
+//                    onResult(false, null, null, null)
+//                }
+//            }
+//    }
 
-            !querySnapshot.isEmpty
-        } catch (e: Exception) {
-            Log.e("FireStore", "Error checking email existence: ${e.message}")
-            false
-        }
-    }
 
     suspend fun uploadPersonalExpense(
         userId: String,
@@ -88,7 +109,10 @@ class RepositoryFireStore @Inject constructor(private val firestore: FirebaseFir
             .document(expenseId)
         try {
             firestoreRef.delete().await()
-            Log.d("FireStore", "Expense deleted successfully from Firestore for user: $userId, ExpenseID: $expenseId")
+            Log.d(
+                "FireStore",
+                "Expense deleted successfully from Firestore for user: $userId, ExpenseID: $expenseId"
+            )
         } catch (e: Exception) {
             Log.e(
                 "FireStore",
@@ -105,7 +129,10 @@ class RepositoryFireStore @Inject constructor(private val firestore: FirebaseFir
 
         try {
             firestoreRef.set(expense).await()
-            Log.d("FireStore", "Expense updated successfully for user: $userId, ExpenseID: ${expense.expenseId}")
+            Log.d(
+                "FireStore",
+                "Expense updated successfully for user: $userId, ExpenseID: ${expense.expenseId}"
+            )
         } catch (e: Exception) {
             Log.e("FireStore", "Error updating expense in Firestore: ${e.message}")
         }

@@ -1,6 +1,7 @@
 package com.isarthaksharma.splitezee.ui.uiComponents
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,9 +39,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDataClass
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDetailDataClass
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupMemberDataClass
+import com.isarthaksharma.splitezee.localStorage.dataClass.SavedUserInfoDataClass
 import com.isarthaksharma.splitezee.viewModel.ViewModelFireStore
 import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDB
 import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDetail
+import com.isarthaksharma.splitezee.viewModel.ViewModelSaveUserInfo
 import java.util.UUID
 import java.util.regex.Pattern
 
@@ -51,7 +54,8 @@ fun CreateGroup(
     onDismiss: () -> Unit,
     viewModelGroupDB: ViewModelGroupDB = hiltViewModel(),
     viewModelGroupDetail: ViewModelGroupDetail = hiltViewModel(),
-    viewModelFireStoreUpload: ViewModelFireStore = hiltViewModel()
+    viewModelFireStoreUpload: ViewModelFireStore = hiltViewModel(),
+    viewModelSaveUserInfo: ViewModelSaveUserInfo = hiltViewModel()
 ) {
     var groupName by remember { mutableStateOf("") }
     var memberEmail by remember { mutableStateOf("") }
@@ -61,9 +65,9 @@ fun CreateGroup(
 
     // ~~ UI
     ModalBottomSheet(onDismissRequest = { onDismiss() }) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp)
-        ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp))
+
+        {
             Text("Create Group", style = MaterialTheme.typography.headlineSmall)
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -91,6 +95,7 @@ fun CreateGroup(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
+
             ) {
                 TextField(
                     value = memberEmail,
@@ -106,25 +111,15 @@ fun CreateGroup(
                     onClick = {
                         val email = memberEmail.trim().lowercase()
                         if (isValidEmail(email)) {
-                            if (!selectedMembers.contains(currentUserEmail))
-                            {
-                                selectedMembers.add(currentUserEmail)
-                            }
-                            else if (!selectedMembers.contains(currentUserEmail))
-                            {
-                                Toast.makeText(context, "Email Already Added !", Toast.LENGTH_SHORT).show()
-                            }
-                            else{
+                            if (!selectedMembers.contains(email)) {
                                 selectedMembers.add(email)
                                 memberEmail = ""
-                            }
+                            } else { Toast.makeText(context, "Email already added!", Toast.LENGTH_SHORT).show() }
+                        } else {
+                            Toast.makeText(context, "Enter a valid Email Address", Toast.LENGTH_SHORT).show()
                         }
-                        else Toast.makeText(context, "Enter a valid Email Address", Toast.LENGTH_SHORT).show()
                     },
-
-                    enabled = memberEmail.trim().isNotEmpty() && !selectedMembers.contains(
-                        memberEmail.trim()
-                    )
+                    enabled = memberEmail.trim().isNotEmpty()
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Add Member")
                 }
@@ -165,13 +160,16 @@ fun CreateGroup(
             Spacer(modifier = Modifier.height(16.dp))
 
             // ***************** Create Group Button *****************
+// ********************************** ROOM DATABASE & FIREBASE **********************************
+// Save group & group details immediately
+
             Button(
                 onClick = {
                     if (groupName.isNotEmpty()) {
                         if (selectedMembers.size > 1) {
                             val randomGroupID = UUID.randomUUID().toString()
 
-                            // Create the group entity
+                            // Save Group Info into Room
                             val groupDB = GroupDataClass(
                                 groupId = randomGroupID,
                                 groupName = groupName,
@@ -179,57 +177,76 @@ fun CreateGroup(
                                 syncStatus = false,
                                 groupCreationData = System.currentTimeMillis(),
                             )
+                            viewModelGroupDB.createGroup(groupDB)
 
-                            // Create group details
+
                             val groupDetailDB = GroupDetailDataClass(
                                 groupDetailID = randomGroupID,
                                 groupName = groupName,
                                 groupAdmin = currentUserEmail,
                                 groupCreateDate = System.currentTimeMillis(),
                                 totalExpense = 0.0,
-                                yourShare = 0.0
+                                yourShare = 0.0,
                             )
-
-                            // Insert into RoomDB
-                            viewModelGroupDB.createGroup(groupDB)
                             viewModelGroupDetail.insertGroup(groupDetailDB)
 
-                            // Insert Members
-                            val membersList = selectedMembers.map { email ->
-                                GroupMemberDataClass(
-                                    groupId = randomGroupID,
-                                    userId = if (email == currentUserEmail) FirebaseAuth.getInstance().currentUser?.uid else null,
-                                    email = email,
-                                    displayName = email.substringBefore('@'),
-                                    profileImage = null,
-                                    registered = email == currentUserEmail
-                                )
-                            }
 
-                            // Insert members into RoomDB
-                            membersList.forEach { member ->
-                                viewModelGroupDetail.insertMember(member)
-                            }
+                            selectedMembers.forEach { email ->
+                                Log.d("FirestoreDebug", "Function Called: $email")
+                                viewModelSaveUserInfo.checkIfUserExists(email) { exist ->
+                                    if (exist) {
+                                        Log.d("FirestoreDebug", "FireStore fetching avoided ")
+                                        viewModelSaveUserInfo.getSavedUserInfo(email){ savedUser ->
+                                            val member = GroupMemberDataClass(
+                                                groupId = randomGroupID,
+                                                userId = savedUser.savedUser_ID ?: "",
+                                                email = email,
+                                                displayName = savedUser.savedUser_Name ?: email.substringBefore("@"),
+                                                profileImage = savedUser.savedUser_Profile,
+                                                registered = true
+                                            )
+                                            viewModelGroupDetail.insertMember(member)
+                                        }
+                                    }
+                                    else {
+                                        Log.d("FirestoreDebug", "FireStore fetching Starts ...")
+                                        viewModelFireStoreUpload.fetchUserInfoByEmail(email) { name, profilePic, userId ->
+                                            val member = GroupMemberDataClass(
+                                                groupId = randomGroupID,
+                                                userId = userId ?: "",
+                                                email = email,
+                                                displayName = name ?: email.substringBefore("@"),
+                                                profileImage = profilePic,
+                                                registered = userId != null
+                                            )
+                                            viewModelGroupDetail.insertMember(member)
 
+                                            // Saving into Room:
+                                            val saveUserInfo = SavedUserInfoDataClass(
+                                                savedUser_ID = userId,
+                                                savedUser_Name = name,
+                                                savedUser_Profile = profilePic,
+                                                savedUser_Email = email
+                                            )
+                                            viewModelSaveUserInfo.insertSavedUserInfo(savedUserInfoDataClass = saveUserInfo)
+                                        }
+                                    }
+                                }
+                            }
                             onDismiss()
-                        } else Toast.makeText(context, "Add at least one member", Toast.LENGTH_SHORT).show()
-                    } else Toast.makeText(context, "You forgot to add Group Name", Toast.LENGTH_SHORT).show()
+                        } else { Toast.makeText(context, "Add at least one member", Toast.LENGTH_SHORT).show() }
+                    } else {Toast.makeText(context, "You forgot to add Group Name", Toast.LENGTH_SHORT).show() }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = groupName.isNotEmpty() && selectedMembers.size > 1
             ) {
                 Text("Create Group")
             }
-
         }
     }
 }
-
 // ***************** Email Pattern *****************
 fun isValidEmail(str: String): Boolean {
-    val emailPattern = Pattern.compile(
-        "[A-Za-z0-9+_.-]+@gmail.com"
-    )
+    val emailPattern = Pattern.compile("[A-Za-z0-9+_.-]+@gmail.com")
     return emailPattern.matcher(str).matches()
 }
-

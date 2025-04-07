@@ -2,6 +2,9 @@ package com.isarthaksharma.splitezee
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.graphics.RenderEffect
+import android.graphics.Shader
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,6 +12,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,13 +37,17 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asComposeRenderEffect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
@@ -89,16 +97,16 @@ fun MainScreen() {
     // App Background Gradient Design
     val gradientColors = if (isSystemInDarkTheme()) {
         listOf(
-            Color(0xFF141E30), // Dark blue
-            Color(0xFF243B55)  // Darker blue-green
+            Color(0xFF0F2027), // Rich black-blue
+            Color(0xFF203A43), // Steel gray-blue
+            Color(0xFF2C5364)  // Deep teal
         )
-
     } else {
         listOf(
-            Color(0xFFE0F2F7), // Very light blue
-            Color(0xFFB2DFDB)  // Light green-blue
+            Color(0xFFE0F7FA), // Soft Aqua
+            Color(0xFFB2EBF2), // Light Cyan
+            Color(0xFFB3E5FC)  // Pastel Blue
         )
-
     }
 
 
@@ -109,6 +117,17 @@ fun MainScreen() {
         Color.Black
     }
 
+    val blurRadius = with(LocalDensity.current) { 5.dp.toPx() }
+    val blurEffect = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            RenderEffect.createBlurEffect(
+                blurRadius,
+                blurRadius,
+                Shader.TileMode.CLAMP
+            )
+        } else null
+    }
+
     // Bottom NavBar
     Scaffold(
         bottomBar = {
@@ -117,15 +136,16 @@ fun MainScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
-                                    Color(0xFF4FC3F7).copy(alpha = 0.6f), // Brighter blue
-                                    Color(0xFF81D4FA).copy(alpha = 0.8f),
-                                    Color(0xFF64B5F6)
-                                )
-                            )
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
                         )
+                        .graphicsLayer {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                renderEffect = blurEffect?.asComposeRenderEffect()
+                            }
+                        }
                 ) {
                     NavigationBar(
                         containerColor = Color.Transparent,
@@ -162,6 +182,22 @@ fun MainScreen() {
                         }
                     }
                 }
+
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+//                        .border(
+//                            width = 1.dp,
+//                            color = Color.White.copy(alpha = 0.2f),
+//                            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+//                        )
+//                        .graphicsLayer {
+//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//                                renderEffect = blurEffect?.asComposeRenderEffect()
+//                            }
+//                        }
+//                )
             }
         },
         content = { paddingValues ->
@@ -177,7 +213,7 @@ fun MainScreen() {
                     )
                     .padding(paddingValues)
                     .padding(horizontal = 5.dp),
-                navController
+                navController = navController
             ) { isBottomBarVisible ->
                 showBottomBar = isBottomBarVisible
             }

@@ -7,6 +7,7 @@ import com.isarthaksharma.splitezee.localStorage.dao.DaoGroupDetails
 import com.isarthaksharma.splitezee.localStorage.dao.DaoGroupExpense
 import com.isarthaksharma.splitezee.localStorage.dao.DaoGroupMember
 import com.isarthaksharma.splitezee.localStorage.dao.DaoPersonal
+import com.isarthaksharma.splitezee.localStorage.dao.DaoSavedUserInfo
 import com.isarthaksharma.splitezee.localStorage.dataBase.SplitezeeDatabase
 import dagger.Module
 import dagger.Provides
@@ -57,5 +58,11 @@ class RoomInstance {
     @Singleton
     fun provideDaoGroupExpense(database: SplitezeeDatabase): DaoGroupExpense {
         return database.daoGroupExpense()
+    }
+
+    @Provides
+    @Singleton
+    fun provideDaoSavedUserInfo(database: SplitezeeDatabase): DaoSavedUserInfo {
+        return database.daoSavedUserInfo()
     }
 }

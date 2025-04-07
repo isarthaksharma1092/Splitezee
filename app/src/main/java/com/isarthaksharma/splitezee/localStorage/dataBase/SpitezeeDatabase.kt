@@ -10,11 +10,13 @@ import com.isarthaksharma.splitezee.localStorage.dao.DaoGroupDetails
 import com.isarthaksharma.splitezee.localStorage.dao.DaoGroupExpense
 import com.isarthaksharma.splitezee.localStorage.dao.DaoGroupMember
 import com.isarthaksharma.splitezee.localStorage.dao.DaoPersonal
+import com.isarthaksharma.splitezee.localStorage.dao.DaoSavedUserInfo
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDataClass
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDetailDataClass
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupExpenseDataClass
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupMemberDataClass
 import com.isarthaksharma.splitezee.localStorage.dataClass.PersonalDataClass
+import com.isarthaksharma.splitezee.localStorage.dataClass.SavedUserInfoDataClass
 
 @Database(
     entities = [
@@ -22,7 +24,8 @@ import com.isarthaksharma.splitezee.localStorage.dataClass.PersonalDataClass
         GroupDataClass::class,
         GroupDetailDataClass::class,
         GroupMemberDataClass::class,
-        GroupExpenseDataClass::class
+        GroupExpenseDataClass::class,
+        SavedUserInfoDataClass::class
     ],
     version = 1,
     exportSchema = false
@@ -35,6 +38,7 @@ abstract class SplitezeeDatabase : RoomDatabase() {
     abstract fun daoGroupMember(): DaoGroupMember
     abstract fun daoGroupExpense(): DaoGroupExpense
     abstract fun daoGroup(): DaoGroup
+    abstract fun daoSavedUserInfo(): DaoSavedUserInfo
 
     companion object {
         @Volatile

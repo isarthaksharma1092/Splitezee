@@ -1,6 +1,7 @@
 package com.isarthaksharma.splitezee.appScreen
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -26,6 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberImagePainter
 import com.isarthaksharma.splitezee.R
 import com.isarthaksharma.splitezee.ui.uiComponents.AnimatedLiquidFAB
 import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDetail
@@ -132,13 +135,16 @@ fun GroupDetailsPage(
                     // ***** Group Members (Avatars + Names) *****
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         FlowRow(
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth().weight(1f).padding(10.dp)
                         ) {
                             groupMembers.forEach { member ->
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
                                     Box(
                                         modifier = Modifier
                                             .size(48.dp)
@@ -146,14 +152,27 @@ fun GroupDetailsPage(
                                             .background(Color(0xFF64B5F6)),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Text(
-                                            member.displayName.first().toString(),
-                                            color = Color.White,
-                                            style = MaterialTheme.typography.bodyLarge
-                                        )
+                                        if(member.userId == null || member.userId == ""){
+                                            Text(
+                                                member.displayName.first().toString(),
+                                                color = Color.White,
+                                                style = MaterialTheme.typography.bodyLarge
+                                            )
+                                        }else{
+                                            val painter = rememberImagePainter(
+                                                data = member.profileImage,
+                                            )
+
+                                            Image(
+                                                painter = painter,
+                                                contentDescription = "Profile image of ${member.displayName}",
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Crop
+                                            )
+                                        }
                                     }
                                     Text(
-                                        text = member.displayName,
+                                        text = member.displayName.substringBefore(" "),
                                         color = MaterialTheme.colorScheme.onBackground,
                                         fontSize = 12.sp,
                                     )
