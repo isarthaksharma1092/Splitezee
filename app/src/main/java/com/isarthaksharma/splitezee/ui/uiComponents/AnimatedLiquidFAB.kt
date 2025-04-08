@@ -11,13 +11,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.RequestPage
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,18 +31,21 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun AnimatedLiquidFAB(
     onShareClick: () -> Unit,
-    onAddMemberClick: () -> Unit,
+    onInformationClick: () -> Unit,
     onAddExpenseClick: () -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-    val rotationAngle by animateFloatAsState(targetValue = if (isExpanded) 45f else 0f, label = "FAB Rotation")
+    val rotationAngle by animateFloatAsState(
+        targetValue = if (isExpanded) 45f else 0f,
+        label = "FAB Rotation"
+    )
     val dismissClick = rememberUpdatedState { isExpanded = false }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .clickable(enabled = isExpanded, onClick = { isExpanded = false })
-            .padding(bottom = 10.dp,end = 10.dp),
+            .padding(bottom = 10.dp, end = 10.dp),
         contentAlignment = Alignment.BottomEnd
     ) {
         Column(
@@ -55,7 +57,27 @@ fun AnimatedLiquidFAB(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Share", color = MaterialTheme.colorScheme.background)
+                    FloatingActionButton(
+                        onClick = {
+                            onInformationClick()
+                            dismissClick.value.invoke()
+                        },
+                        containerColor = MaterialTheme.colorScheme.surfaceBright
+                    ) {
+                        Icon(
+                            Icons.Default.Info,
+                            contentDescription = "Information",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+            }
+
+            AnimatedVisibility(visible = isExpanded) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     FloatingActionButton(
                         onClick = {
                             onShareClick()
@@ -63,44 +85,30 @@ fun AnimatedLiquidFAB(
                         },
                         containerColor = MaterialTheme.colorScheme.surfaceBright
                     ) {
-                        Icon(Icons.Default.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onBackground)
+                        Icon(
+                            Icons.Default.Share,
+                            contentDescription = "Share",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
                     }
                 }
             }
 
+            AnimatedVisibility(visible = isExpanded) {
 
-            AnimatedVisibility(visible = isExpanded) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                FloatingActionButton(
+                    onClick = {
+                        onAddExpenseClick()
+                        dismissClick.value.invoke()
+                    },
+                    containerColor = MaterialTheme.colorScheme.surfaceBright
                 ) {
-                    Text("Add Member", color = MaterialTheme.colorScheme.background)
-                    FloatingActionButton(
-                        onClick = {
-                            onAddMemberClick()
-                            dismissClick.value.invoke()
-                        },
-                        containerColor = MaterialTheme.colorScheme.surfaceBright
-                    ) {
-                        Icon(Icons.Default.PersonAdd, contentDescription = "Add Member",tint = MaterialTheme.colorScheme.onBackground)
-                    }
-                }
-            }
-            AnimatedVisibility(visible = isExpanded) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text("Add Expense", color = MaterialTheme.colorScheme.background)
-                    FloatingActionButton(
-                        onClick = {
-                            onAddExpenseClick()
-                            dismissClick.value.invoke()
-                        },
-                        containerColor = MaterialTheme.colorScheme.surfaceBright
-                    ) {
-                        Icon(Icons.Default.RequestPage, contentDescription = "Add Expense",tint = MaterialTheme.colorScheme.onBackground)
-                    }
+                    Icon(
+                        Icons.Default.Payments,
+                        contentDescription = "Add Expense",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+
                 }
             }
 

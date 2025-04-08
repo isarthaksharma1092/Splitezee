@@ -1,19 +1,49 @@
 package com.isarthaksharma.splitezee.appScreen
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,6 +51,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -28,18 +59,27 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.isarthaksharma.splitezee.R
+import com.isarthaksharma.splitezee.localStorage.dataClass.GroupMemberDataClass
+import com.isarthaksharma.splitezee.ui.uiComponents.AddGroupExpense
+import com.isarthaksharma.splitezee.ui.uiComponents.AddGroupMember
 import com.isarthaksharma.splitezee.ui.uiComponents.AnimatedLiquidFAB
 import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDetail
+import com.isarthaksharma.splitezee.viewModel.ViewModelSaveUserInfo
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class,
+@OptIn(
+    ExperimentalMaterial3Api::class,
     ExperimentalMaterial3ExpressiveApi::class,
     ExperimentalLayoutApi::class
 )
 @Composable
 fun GroupDetailsPage(
     viewModelGroupDetail: ViewModelGroupDetail = hiltViewModel(),
+    viewModelSaveUserInfo: ViewModelSaveUserInfo = hiltViewModel(),
     groupId: String,
     goToGroupSettings: () -> Unit
 ) {
@@ -48,25 +88,32 @@ fun GroupDetailsPage(
         viewModelGroupDetail.getMembersByGroupId(groupId)
     }
 
-    val gradientColors = if (isSystemInDarkTheme()) { listOf(Color(0xFF1A237E), Color(0xFF9575CD), Color(0xFF000000)) }
-    else { listOf(Color(0xFF64B5F6), Color(0xFF9575CD), Color(0xFFFFFFFF))
+    val gradientColors = if (isSystemInDarkTheme()) {
+        listOf(Color(0xFF1A237E), Color(0xFF9575CD), Color(0xFF000000))
+    } else {
+        listOf(Color(0xFF64B5F6), Color(0xFF9575CD), Color(0xFFFFFFFF))
     }
 
-    val headerCardColor = if (isSystemInDarkTheme()) { Color(0xFF2E3B55).copy(alpha = 0.6f) }
-    else { Color(0xFFE3F2FD).copy(alpha = 0.6f) }
+    val headerCardColor = if (isSystemInDarkTheme()) {
+        Color(0xFF2E3B55).copy(alpha = 0.6f)
+    } else {
+        Color(0xFFE3F2FD).copy(alpha = 0.6f)
+    }
 
     val groupDetailPage by viewModelGroupDetail.groupDetails.collectAsState()
     val context = LocalContext.current
     var isEditSheetOpen by rememberSaveable { mutableStateOf(false) }
 
     val groupMembers by viewModelGroupDetail.groupMembers.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
+    var addGroupExpense by rememberSaveable { mutableStateOf(false) }
+    var addGroupMember by rememberSaveable { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.verticalGradient(colors = gradientColors))
     ) {
-
         Column(modifier = Modifier.fillMaxSize()) {
 
             // ****************** HEADER ******************
@@ -95,10 +142,7 @@ fun GroupDetailsPage(
                             textAlign = TextAlign.Center,
                         )
                         // Using IconButton for better click handling
-                        IconButton(onClick = {
-                            Toast.makeText(context, "Settings Clicked", Toast.LENGTH_SHORT).show()
-                            goToGroupSettings()
-                        }) {
+                        IconButton(onClick = { goToGroupSettings() }) {
                             Icon(
                                 Icons.Default.Settings,
                                 contentDescription = "Settings",
@@ -138,7 +182,12 @@ fun GroupDetailsPage(
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         FlowRow(
-                            modifier = Modifier.fillMaxWidth().weight(1f).padding(10.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .padding(10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             groupMembers.forEach { member ->
                                 Column(
@@ -152,19 +201,15 @@ fun GroupDetailsPage(
                                             .background(Color(0xFF64B5F6)),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        if(member.userId == null || member.userId == ""){
+                                        if (member.userId.isNullOrEmpty()) {
                                             Text(
                                                 member.displayName.first().toString(),
                                                 color = Color.White,
                                                 style = MaterialTheme.typography.bodyLarge
                                             )
-                                        }else{
-                                            val painter = rememberImagePainter(
-                                                data = member.profileImage,
-                                            )
-
+                                        } else {
                                             Image(
-                                                painter = painter,
+                                                painter = rememberAsyncImagePainter(member.profileImage),
                                                 contentDescription = "Profile image of ${member.displayName}",
                                                 modifier = Modifier.fillMaxSize(),
                                                 contentScale = ContentScale.Crop
@@ -188,7 +233,7 @@ fun GroupDetailsPage(
                                     .clip(CircleShape)
                                     .background(Color(0xFF64B5F6))
                                     .padding(10.dp)
-                                    .clickable { goToGroupSettings() }
+                                    .clickable { addGroupMember = true }
                             )
                         }
                     }
@@ -218,21 +263,46 @@ fun GroupDetailsPage(
                 Spacer(modifier = Modifier.height(16.dp))
 
             }
-            // ******** Floating Action Button
+
             Box(modifier = Modifier.padding(bottom = 30.dp)) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Image(
+                        painterResource(R.drawable.group_nothing_found),
+                        contentDescription = "No Expense Added",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .weight(.1f)
+                    )
+                }
                 AnimatedLiquidFAB(
-                    onShareClick = { Toast.makeText(context, "Share", Toast.LENGTH_SHORT).show() },
-                    onAddMemberClick = {
+                    onShareClick = {
+                        val share = Intent.createChooser(Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                "https://github.com/isarthaksharma1092/Splitezee/releases"
+                            )
+                            putExtra(Intent.EXTRA_TITLE, "Checkout Splitezee")
+                            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        }, null)
+                        context.startActivity(share)
+                    },
+                    onInformationClick = {
                         Toast.makeText(context, "Add Member", Toast.LENGTH_SHORT).show()
                     },
                     onAddExpenseClick = {
-                        Toast.makeText(context, "Add Expense", Toast.LENGTH_SHORT).show()
+                        addGroupExpense = true
                     }
                 )
+
             }
         }
     }
-
     // ****************** Edit Group Modal ******************
     if (isEditSheetOpen) {
         ModalBottomSheet(onDismissRequest = { isEditSheetOpen = false }) {
@@ -251,9 +321,38 @@ fun GroupDetailsPage(
             }
         }
     }
+
+    if (addGroupExpense) {
+        AddGroupExpense(
+            onDismiss = { addGroupExpense = false },
+            groupMembers = groupMembers,
+        )
+    }
+
+    if (addGroupMember) {
+        val member = GroupMemberDataClass (
+            groupId = "randomGroupID",
+            userId = "savedUser.savedUser_ID ?",
+            email = "email",
+            displayName = "savedUser.savedUser_Name ?: email.substringBefore",
+            profileImage = "savedUser.savedUser_Profile",
+            registered = true
+        )
+        AddGroupMember(
+
+            onDismiss = { addGroupMember = false },
+            snackbarHostState = snackbarHostState,
+            onAddMember = {}
+//                { email ->
+//                viewModelGroupDetail.insertGroup(member)
+//            }
+        )
+    }
+
+    SnackbarHost(hostState = snackbarHostState)
 }
 
 fun formatDate(timestamp: Long): String {
-    val sdf = java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault())
-    return sdf.format(java.util.Date(timestamp))
+    val sdf = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+    return sdf.format(Date(timestamp))
 }
