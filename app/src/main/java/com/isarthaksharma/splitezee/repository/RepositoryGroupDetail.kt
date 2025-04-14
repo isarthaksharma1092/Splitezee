@@ -2,7 +2,6 @@ package com.isarthaksharma.splitezee.repository
 
 import com.isarthaksharma.splitezee.localStorage.dataBase.SplitezeeDatabase
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDetailDataClass
-import com.isarthaksharma.splitezee.localStorage.dataClass.GroupExpenseDataClass
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupMemberDataClass
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -54,29 +53,4 @@ class RepositoryGroupDetail @Inject constructor(
         db.daoGroupMember().deleteAllMembersFromGroup(userId)
     }
 
-    // ****************** GROUP EXPENSES ******************
-
-    fun getAllExpenses(): Flow<List<GroupExpenseDataClass>> {
-        return db.daoGroupExpense().getAllExpense()
-    }
-
-    suspend fun addExpense(expense: GroupExpenseDataClass) {
-        db.daoGroupExpense().addExpense(expense)
-    }
-
-    suspend fun updateExpense(expense: GroupExpenseDataClass) {
-        db.daoGroupExpense().updateGroupExpense(expense)
-    }
-
-    suspend fun deleteExpense(expenseId: String) {
-        db.daoGroupExpense().deleteMember(expenseId)
-    }
-
-    suspend fun deleteAllExpenses() {
-        db.daoGroupExpense().deleteAllExpense()
-    }
-
-    suspend fun getExpenseById(expenseId: String): GroupExpenseDataClass? {
-        return db.daoGroupExpense().getGroupExpenseById(expenseId)
-    }
 }

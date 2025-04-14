@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DaoGroupExpense {
+    // Count of Data in Room
+    @Query("SELECT COUNT(*) FROM GroupExpenseDataClass")
+    suspend fun getExpenseCount(): Int
 
     // Get all expense
     @Query("SELECT * FROM GroupExpenseDataClass")
@@ -19,8 +22,8 @@ interface DaoGroupExpense {
     suspend fun addExpense(expense: GroupExpenseDataClass)
 
     // Delete Expense
-    @Query("DELETE FROM GroupExpenseDataClass")
-    suspend fun deleteAllExpense()
+    @Query("DELETE FROM GroupExpenseDataClass WHERE expenseId = :expenseId")
+    suspend fun deleteAllExpense(expenseId:String)
 
     // Delete a specific member by userId
     @Query("DELETE FROM GroupExpenseDataClass WHERE expenseId = :expenseId")
@@ -31,8 +34,6 @@ interface DaoGroupExpense {
     suspend fun updateGroupExpense(expense: GroupExpenseDataClass)
 
     // Get particular expense
-    @Query("SELECT * FROM GroupExpenseDataClass WHERE expenseId = :groupExpenseId LIMIT 1")
+    @Query("SELECT * FROM GroupExpenseDataClass WHERE groupId = :groupExpenseId")
     suspend fun getGroupExpenseById(groupExpenseId: String): GroupExpenseDataClass?
-
-
 }

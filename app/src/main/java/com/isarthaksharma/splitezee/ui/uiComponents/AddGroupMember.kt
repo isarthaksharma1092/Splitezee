@@ -1,5 +1,6 @@
 package com.isarthaksharma.splitezee.ui.uiComponents
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -27,15 +28,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.isarthaksharma.splitezee.localStorage.dataClass.GroupMemberDataClass
+import com.isarthaksharma.splitezee.localStorage.dataClass.SavedUserInfoDataClass
+import com.isarthaksharma.splitezee.viewModel.ViewModelFireStore
+import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDetail
+import com.isarthaksharma.splitezee.viewModel.ViewModelSaveUserInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.regex.Pattern
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddGroupMember(
+    viewModelSaveUserInfo: ViewModelSaveUserInfo = hiltViewModel(),
+    viewModelGroupDetail: ViewModelGroupDetail = hiltViewModel(),
+    viewModelFireStoreUpload: ViewModelFireStore = hiltViewModel(),
+
     onDismiss: () -> Unit,
-    onAddMember: () -> Unit,
+    groupId: String,
     snackbarHostState: SnackbarHostState
 ) {
     var emailInput by remember { mutableStateOf("") }
@@ -72,9 +84,49 @@ fun AddGroupMember(
 
             Button(
                 onClick = {
-                    if (emailInput.isNotBlank() &&
-                        android.util.Patterns.EMAIL_ADDRESS.matcher(emailInput).matches()
+                    val email = emailInput.trim().lowercase()
+                    if (email.isNotBlank() &&
+                        Pattern.compile("[A-Za-z0-9+_.-]+@gmail.com").matcher(email).matches()
                     ) {
+                        viewModelSaveUserInfo.checkIfUserExists(email) { exist ->
+                            if (exist) {
+                                Log.d("FirestoreDebug", "FireStore fetching avoided ")
+                                viewModelSaveUserInfo.getSavedUserInfo(email){ savedUser ->
+                                    val member = GroupMemberDataClass(
+                                        groupId = groupId,
+                                        userId = savedUser.savedUser_ID ?:email,
+                                        email = email,
+                                        displayName = savedUser.savedUser_Name ?: email.substringBefore("@"),
+                                        profileImage = savedUser.savedUser_Profile,
+                                        registered = true
+                                    )
+                                    viewModelGroupDetail.insertMember(member)
+                                }
+                            }
+                            else {
+                                Log.d("FirestoreDebug", "FireStore fetching Starts ...")
+                                viewModelFireStoreUpload.fetchUserInfoByEmail(email) { name, profilePic, userId ->
+                                    val member = GroupMemberDataClass(
+                                        groupId = groupId,
+                                        userId = userId ?: email,
+                                        email = email,
+                                        displayName = name ?: email.substringBefore("@"),
+                                        profileImage = profilePic,
+                                        registered = userId != null
+                                    )
+                                    viewModelGroupDetail.insertMember(member)
+
+                                    // Saving into Room:
+                                    val saveUserInfo = SavedUserInfoDataClass(
+                                        savedUser_ID = userId ?: email,
+                                        savedUser_Name = name ?: email.substringBefore("@"),
+                                        savedUser_Profile = profilePic,
+                                        savedUser_Email = email
+                                    )
+                                    viewModelSaveUserInfo.insertSavedUserInfo(savedUserInfoDataClass = saveUserInfo)
+                                }
+                            }
+                        }
 
                         isLoading = true
 
@@ -111,18 +163,3 @@ fun AddGroupMember(
     }
 }
 
-//    3. Composable Usage
-//            kotlin
-//    Copy
-//    Edit
-//    if (isAddMemberSheetVisible) {
-//        AddMemberBottomSheet(
-//            onDismiss = { isAddMemberSheetVisible = false },
-//            snackbarHostState = snackbarHostState,
-//            onAddMember = { email ->
-//                viewModelGroupDetail.addMemberToGroup(email, groupId)
-//            }
-//        )
-//    }
-//
-//    SnackbarHost(hostState = snackbarHostState)

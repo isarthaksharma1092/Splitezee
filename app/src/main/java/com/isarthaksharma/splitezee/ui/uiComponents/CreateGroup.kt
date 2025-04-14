@@ -199,7 +199,7 @@ fun CreateGroup(
                                         viewModelSaveUserInfo.getSavedUserInfo(email){ savedUser ->
                                             val member = GroupMemberDataClass(
                                                 groupId = randomGroupID,
-                                                userId = savedUser.savedUser_ID ?: "",
+                                                userId = savedUser.savedUser_ID ?: email,
                                                 email = email,
                                                 displayName = savedUser.savedUser_Name ?: email.substringBefore("@"),
                                                 profileImage = savedUser.savedUser_Profile,
@@ -213,7 +213,7 @@ fun CreateGroup(
                                         viewModelFireStoreUpload.fetchUserInfoByEmail(email) { name, profilePic, userId ->
                                             val member = GroupMemberDataClass(
                                                 groupId = randomGroupID,
-                                                userId = userId ?: "",
+                                                userId = userId ?: email,
                                                 email = email,
                                                 displayName = name ?: email.substringBefore("@"),
                                                 profileImage = profilePic,

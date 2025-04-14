@@ -32,7 +32,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -60,13 +59,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.isarthaksharma.splitezee.R
-import com.isarthaksharma.splitezee.localStorage.dataClass.GroupMemberDataClass
 import com.isarthaksharma.splitezee.ui.uiComponents.AddGroupExpense
 import com.isarthaksharma.splitezee.ui.uiComponents.AddGroupMember
 import com.isarthaksharma.splitezee.ui.uiComponents.AnimatedLiquidFAB
 import com.isarthaksharma.splitezee.viewModel.ViewModelGroupDetail
-import com.isarthaksharma.splitezee.viewModel.ViewModelSaveUserInfo
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -79,9 +78,8 @@ import java.util.Locale
 @Composable
 fun GroupDetailsPage(
     viewModelGroupDetail: ViewModelGroupDetail = hiltViewModel(),
-    viewModelSaveUserInfo: ViewModelSaveUserInfo = hiltViewModel(),
     groupId: String,
-    goToGroupSettings: () -> Unit
+    goToGroupSettings: (String) -> Unit
 ) {
     LaunchedEffect(groupId) {
         viewModelGroupDetail.fetchGroupDetails(groupId)
@@ -142,7 +140,7 @@ fun GroupDetailsPage(
                             textAlign = TextAlign.Center,
                         )
                         // Using IconButton for better click handling
-                        IconButton(onClick = { goToGroupSettings() }) {
+                        IconButton(onClick = { goToGroupSettings(groupId) }) {
                             Icon(
                                 Icons.Default.Settings,
                                 contentDescription = "Settings",
@@ -179,7 +177,7 @@ fun GroupDetailsPage(
                     // ***** Group Members (Avatars + Names) *****
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(7.dp)
                     ) {
                         FlowRow(
                             modifier = Modifier
@@ -187,12 +185,10 @@ fun GroupDetailsPage(
                                 .weight(1f)
                                 .padding(10.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             groupMembers.forEach { member ->
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
                                     Box(
                                         modifier = Modifier
@@ -201,7 +197,7 @@ fun GroupDetailsPage(
                                             .background(Color(0xFF64B5F6)),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        if (member.userId.isNullOrEmpty()) {
+                                        if (member.profileImage.isNullOrEmpty()) {
                                             Text(
                                                 member.displayName.first().toString(),
                                                 color = Color.White,
@@ -220,7 +216,22 @@ fun GroupDetailsPage(
                                         text = member.displayName.substringBefore(" "),
                                         color = MaterialTheme.colorScheme.onBackground,
                                         fontSize = 12.sp,
+                                        modifier = Modifier.padding(top = 12.dp)
                                     )
+                                    if(groupDetailPage?.groupAdmin == member.email){
+                                        Text(
+                                            text = "(Admin)",
+                                            color = MaterialTheme.colorScheme.onBackground,
+                                            fontSize = 12.sp,
+                                        )
+                                    }
+                                    if(member.userId.isNullOrEmpty()){
+                                        Text(
+                                            text = "(Anonymous)",
+                                            color = MaterialTheme.colorScheme.onBackground,
+                                            fontSize = 12.sp,
+                                        )
+                                    }
                                 }
                             }
                             // Add Member Button (Fixed Clickable)
@@ -266,17 +277,23 @@ fun GroupDetailsPage(
 
             Box(modifier = Modifier.padding(bottom = 30.dp)) {
                 Column(
-                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxSize()
-                ) {
+                    verticalArrangement = Arrangement.Center
+                ){
                     Image(
-                        painterResource(R.drawable.group_nothing_found),
+                        painter = painterResource(R.drawable.group_nothing_found),
                         contentDescription = "No Expense Added",
-                        contentScale = ContentScale.Fit,
                         modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .weight(.1f)
+                            .padding(horizontal = 32.dp, vertical = 24.dp)
+                            .fillMaxWidth(0.6f),
+                        contentScale = ContentScale.Fit
+                    )
+                    Text(
+                        text = "No Group Expense was Found" +
+                                "\nClick on + to add now.",
+                        textAlign = TextAlign.Justify,
+                        color = if(isSystemInDarkTheme()) Color.LightGray else Color.DarkGray
                     )
                 }
                 AnimatedLiquidFAB(
@@ -323,33 +340,23 @@ fun GroupDetailsPage(
     }
 
     if (addGroupExpense) {
-        AddGroupExpense(
-            onDismiss = { addGroupExpense = false },
-            groupMembers = groupMembers,
-        )
-    }
+        (Firebase.auth.currentUser?.displayName?:Firebase.auth.currentUser?.email?.substringBefore("@"))?.let {
+            AddGroupExpense(
+                onDismiss = { addGroupExpense = false },
+                groupMembers = groupMembers,
+                groupId = groupId,
+                currentUserName = it?:"null"
+            )
+        }
 
+    }
     if (addGroupMember) {
-        val member = GroupMemberDataClass (
-            groupId = "randomGroupID",
-            userId = "savedUser.savedUser_ID ?",
-            email = "email",
-            displayName = "savedUser.savedUser_Name ?: email.substringBefore",
-            profileImage = "savedUser.savedUser_Profile",
-            registered = true
-        )
         AddGroupMember(
-
             onDismiss = { addGroupMember = false },
+            groupId = groupId,
             snackbarHostState = snackbarHostState,
-            onAddMember = {}
-//                { email ->
-//                viewModelGroupDetail.insertGroup(member)
-//            }
         )
     }
-
-    SnackbarHost(hostState = snackbarHostState)
 }
 
 fun formatDate(timestamp: Long): String {

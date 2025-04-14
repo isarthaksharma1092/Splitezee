@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DaoGroupMember {
+
     @Query("SELECT * FROM group_members WHERE groupId = :groupId")
     fun getMembersByGroupId(groupId: String): Flow<List<GroupMemberDataClass>>
 

@@ -4,13 +4,11 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupDetailDataClass
-import com.isarthaksharma.splitezee.localStorage.dataClass.GroupExpenseDataClass
 import com.isarthaksharma.splitezee.localStorage.dataClass.GroupMemberDataClass
 import com.isarthaksharma.splitezee.repository.RepositoryGroupDetail
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -95,43 +93,4 @@ class ViewModelGroupDetail @Inject constructor(
         }
     }
 
-    // ****************** GROUP EXPENSES ******************
-    private val _groupExpenses = MutableStateFlow<List<GroupExpenseDataClass>>(emptyList())
-    val groupExpenses: StateFlow<List<GroupExpenseDataClass>> = _groupExpenses.asStateFlow()
-
-    fun fetchAllExpenses() {
-        viewModelScope.launch {
-            repository.getAllExpenses().collect { expenses ->
-                _groupExpenses.value = expenses
-            }
-        }
-    }
-
-    fun addExpense(expense: GroupExpenseDataClass) {
-        viewModelScope.launch {
-            repository.addExpense(expense)
-            fetchAllExpenses()
-        }
-    }
-
-    fun updateExpense(expense: GroupExpenseDataClass) {
-        viewModelScope.launch {
-            repository.updateExpense(expense)
-            fetchAllExpenses()
-        }
-    }
-
-    fun deleteExpense(expenseId: String) {
-        viewModelScope.launch {
-            repository.deleteExpense(expenseId)
-            fetchAllExpenses()
-        }
-    }
-
-    fun deleteAllExpenses() {
-        viewModelScope.launch {
-            repository.deleteAllExpenses()
-            fetchAllExpenses()
-        }
-    }
 }

@@ -21,6 +21,7 @@ class ViewModelPersonalDB @Inject constructor(private val repository: Repository
 
     val personalTodayExpense: StateFlow<Long?> = repository.getPersonalTodayExpense()
         .stateIn(viewModelScope, SharingStarted.Lazily, 0L)
+
     val personalMonthExpense: StateFlow<Long?> = repository.getPersonalMonthExpense()
         .stateIn(viewModelScope, SharingStarted.Lazily, 0L)
     val personalAllExpense: StateFlow<Long?> = repository.getPersonalAllExpense()

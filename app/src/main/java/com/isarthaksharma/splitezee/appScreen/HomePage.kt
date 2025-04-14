@@ -4,6 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -75,6 +77,7 @@ fun HomePage(
     viewModelFireStore: ViewModelFireStore = hiltViewModel(),
     goSetting: () -> Unit
 ) {
+
     val userProfile by userInfoViewModel.userProfile.collectAsState()
     val expenses by viewModelPersonalDB.expenses.collectAsState()
 
@@ -89,6 +92,7 @@ fun HomePage(
     var openDelAlert by remember { mutableStateOf(false) }
     var selectedExpense by remember { mutableStateOf<PersonalDataClass?>(null) }
     var openEditDialog by remember { mutableStateOf(false) }
+
 
     Box(modifier = modifier) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -207,98 +211,123 @@ fun HomePage(
                 }
             }
 
-            // ~~ Expense List
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(expenses) { expense ->
-
-                    val swipeState = rememberSwipeToDismissBoxState(
-                        confirmValueChange = {
-                            when (it) {
-                                SwipeToDismissBoxValue.EndToStart -> {
-                                    selectedExpense = expense
-                                    openDelAlert = true
-                                    false
-                                }
-
-                                SwipeToDismissBoxValue.StartToEnd -> {
-                                    selectedExpense = expense
-                                    openEditDialog = true
-                                    false
-                                }
-
-                                else -> false
-                            }
-                        },
-                        positionalThreshold = { 0.25f }
+            if (expenses.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(.1f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.personal_nothing_found),
+                        contentDescription = "No Expense Added",
+                        modifier = Modifier
+                            .padding(horizontal = 32.dp, vertical = 24.dp)
+                            .fillMaxWidth(0.6f),
+                        contentScale = ContentScale.Fit
                     )
+                    Text(
+                        text = "No Personal Expense Available\nClick on + to add.",
+                        textAlign = TextAlign.Justify,
+                        color = if(isSystemInDarkTheme()) Color.LightGray else Color.DarkGray
+                    )
+                }
+            } else {
 
-                    // Delete Confirmation Dialog
-                    if (openDelAlert && selectedExpense == expense) {
-                        AlertBoxMenu(
-                            onDismissRequest = {
-                                openDelAlert = false
-                                selectedExpense = null
-                            },
-                            onConfirmation = {
-                                selectedExpense?.let {
-                                    viewModelPersonalDB.removePersonalExpense(it)
-                                    viewModelFireStore.removePersonalExpense(expenseID = it.expenseId)
+                // ~~ Expense List
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(expenses) { expense ->
+
+                        val swipeState = rememberSwipeToDismissBoxState(
+                            confirmValueChange = {
+                                when (it) {
+                                    SwipeToDismissBoxValue.EndToStart -> {
+                                        selectedExpense = expense
+                                        openDelAlert = true
+                                        false
+                                    }
+
+                                    SwipeToDismissBoxValue.StartToEnd -> {
+                                        selectedExpense = expense
+                                        openEditDialog = true
+                                        false
+                                    }
+
+                                    else -> false
                                 }
-                                openDelAlert = false
-                                selectedExpense = null
                             },
-                            dialogTitle = "Delete Expense?",
-                            dialogText = "Are you sure you want to delete it?",
-                            option1 = "Cancel",
-                            option2 = "Delete"
+                            positionalThreshold = { 0.25f }
                         )
-                    }
 
-                    // Edit Expense Dialog
-                    if (openEditDialog && selectedExpense == expense) {
-                        openEditDialog = true
-                    }
-                    val backgroundColor by animateColorAsState(
-                        targetValue = when (swipeState.targetValue) {
-                            SwipeToDismissBoxValue.StartToEnd -> Color.Blue // Edit
-                            SwipeToDismissBoxValue.EndToStart -> Color.Red // Delete
-                            else -> Color.Gray // Default (neutral state)
-                        }, label = "SwipeColor"
-                    )
-                    SwipeToDismissBox(
-                        state = swipeState,
-                        backgroundContent = {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(shape = RoundedCornerShape(10.dp))
-                                    .background(backgroundColor) // Smooth color transition
-                                    .padding(horizontal = 8.dp),
-                                contentAlignment = if (swipeState.targetValue == SwipeToDismissBoxValue.StartToEnd) Alignment.CenterStart else Alignment.CenterEnd
-                            ) {
-                                Icon(
-                                    imageVector = if (swipeState.targetValue == SwipeToDismissBoxValue.StartToEnd) Icons.Default.Edit else Icons.Default.Delete,
-                                    contentDescription = if (swipeState.targetValue == SwipeToDismissBoxValue.StartToEnd) "Edit" else "Delete",
-                                    tint = Color.White
-                                )
-                            }
-                        },
-                        enableDismissFromStartToEnd = true,
-                        enableDismissFromEndToStart = true,
-                        gesturesEnabled = true,
-                        content = {
-                            ExpenseShowCard(
-                                expense.expenseName,
-                                expense.expenseDate,
-                                expense.expenseAmt,
-                                expense.expenseMsg,
-                                expense.expenseCurrency
+                        // Delete Confirmation Dialog
+                        if (openDelAlert && selectedExpense == expense) {
+                            AlertBoxMenu(
+                                onDismissRequest = {
+                                    openDelAlert = false
+                                    selectedExpense = null
+                                },
+                                onConfirmation = {
+                                    selectedExpense?.let {
+                                        viewModelPersonalDB.removePersonalExpense(it)
+                                        viewModelFireStore.removePersonalExpense(expenseID = it.expenseId)
+                                    }
+                                    openDelAlert = false
+                                    selectedExpense = null
+                                },
+                                dialogTitle = "Delete Expense?",
+                                dialogText = "Are you sure you want to delete it?",
+                                option1 = "Cancel",
+                                option2 = "Delete"
                             )
                         }
-                    )
+
+                        // Edit Expense Dialog
+                        if (openEditDialog && selectedExpense == expense) {
+                            openEditDialog = true
+                        }
+                        val backgroundColor by animateColorAsState(
+                            targetValue = when (swipeState.targetValue) {
+                                SwipeToDismissBoxValue.StartToEnd -> Color.Blue // Edit
+                                SwipeToDismissBoxValue.EndToStart -> Color.Red // Delete
+                                else -> Color.Gray // Default (neutral state)
+                            }, label = "SwipeColor"
+                        )
+                        SwipeToDismissBox(
+                            state = swipeState,
+                            backgroundContent = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(shape = RoundedCornerShape(10.dp))
+                                        .background(backgroundColor) // Smooth color transition
+                                        .padding(horizontal = 8.dp),
+                                    contentAlignment = if (swipeState.targetValue == SwipeToDismissBoxValue.StartToEnd) Alignment.CenterStart else Alignment.CenterEnd
+                                ) {
+                                    Icon(
+                                        imageVector = if (swipeState.targetValue == SwipeToDismissBoxValue.StartToEnd) Icons.Default.Edit else Icons.Default.Delete,
+                                        contentDescription = if (swipeState.targetValue == SwipeToDismissBoxValue.StartToEnd) "Edit" else "Delete",
+                                        tint = Color.White
+                                    )
+                                }
+                            },
+                            enableDismissFromStartToEnd = true,
+                            enableDismissFromEndToStart = true,
+                            gesturesEnabled = true,
+                            content = {
+                                ExpenseShowCard(
+                                    expense.expenseName,
+                                    expense.expenseDate,
+                                    expense.expenseAmt,
+                                    expense.expenseMsg,
+                                    expense.expenseCurrency
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -315,11 +344,15 @@ fun HomePage(
                 Icon(
                     Icons.Default.Add,
                     contentDescription = null,
-                    modifier = Modifier.padding(horizontal = 5.dp).align(Alignment.CenterVertically)
+                    modifier = Modifier
+                        .padding(horizontal = 5.dp)
+                        .align(Alignment.CenterVertically)
                 )
                 Text(
                     text = "Add Expense",
-                    modifier = Modifier.padding(horizontal = 5.dp).align(Alignment.CenterVertically),
+                    modifier = Modifier
+                        .padding(horizontal = 5.dp)
+                        .align(Alignment.CenterVertically),
                     textAlign = TextAlign.Center
                 )
             }
@@ -332,11 +365,11 @@ fun HomePage(
         AddExpense(sheetState, onDismiss = { isPersonalSheetOpen = false })
     }
 
-    if(openEditDialog){
+    if (openEditDialog) {
         EditExpense(
             expense = selectedExpense!!,
             onDismiss = { openEditDialog = false },
-            onSave = {updatedExpense->
+            onSave = { updatedExpense ->
                 openEditDialog = false
                 viewModelFireStore.updatePersonalExpense(updatedExpense)
                 viewModelPersonalDB.updatePersonalExpense(updatedExpense)

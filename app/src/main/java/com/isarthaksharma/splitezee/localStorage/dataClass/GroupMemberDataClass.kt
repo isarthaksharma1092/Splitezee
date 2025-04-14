@@ -14,4 +14,6 @@ data class GroupMemberDataClass(
     val displayName: String,
     val profileImage: String?,
     val registered: Boolean
-)
+){
+    constructor():this("","","","","",false)
+}

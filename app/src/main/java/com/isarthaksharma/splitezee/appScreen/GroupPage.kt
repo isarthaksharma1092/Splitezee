@@ -70,7 +70,6 @@ fun GroupPage(
             // ***************** Group List *****************
             LazyColumn(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(groupDB) {it ->
                     GroupItem(

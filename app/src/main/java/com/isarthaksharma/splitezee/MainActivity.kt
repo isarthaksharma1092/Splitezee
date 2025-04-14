@@ -123,7 +123,7 @@ fun MainScreen() {
             RenderEffect.createBlurEffect(
                 blurRadius,
                 blurRadius,
-                Shader.TileMode.CLAMP
+                Shader.TileMode.REPEAT
             )
         } else null
     }
@@ -135,18 +135,24 @@ fun MainScreen() {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                        .padding(top=4.dp)
+                        .clip(RoundedCornerShape(24.dp))
                         .border(
                             width = 1.dp,
-                            color = Color.White.copy(alpha = 0.2f),
+                            color = Color.White.copy(alpha = 0.5f),
                             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
                         )
-                        .graphicsLayer {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                renderEffect = blurEffect?.asComposeRenderEffect()
-                            }
-                        }
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .graphicsLayer {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                    renderEffect = blurEffect?.asComposeRenderEffect()
+                                }
+                            }
+                            .background(Color.Transparent) // Optional, depending on your design
+                    )
                     NavigationBar(
                         containerColor = Color.Transparent,
                         tonalElevation = 0.dp
@@ -182,22 +188,6 @@ fun MainScreen() {
                         }
                     }
                 }
-
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-//                        .border(
-//                            width = 1.dp,
-//                            color = Color.White.copy(alpha = 0.2f),
-//                            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-//                        )
-//                        .graphicsLayer {
-//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//                                renderEffect = blurEffect?.asComposeRenderEffect()
-//                            }
-//                        }
-//                )
             }
         },
         content = { paddingValues ->
@@ -207,8 +197,8 @@ fun MainScreen() {
                     .background(
                         Brush.verticalGradient(
                             colors = gradientColors,
-                            startY = 200f,
-                            endY = 500f
+                            startY = 500f,
+                            endY = 900f
                         )
                     )
                     .padding(paddingValues)
@@ -435,12 +425,12 @@ fun NavigationPage(
             onBottomBarVisibilityChange(false)
             val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
             GroupDetailsPage(groupId = groupId) {
-                navController.navigate(NavigationUtility.GroupSettingPage)
+                navController.navigate("${NavigationUtility.GroupDetailsPage}/$it")
             }
         }
 
         composable(
-            route = NavigationUtility.GroupSettingPage,
+            route = "${NavigationUtility.GroupSettingPage}/{groupIDForSetting}",
             enterTransition = {
                 slideIntoContainer(
                     AnimatedContentTransitionScope.SlideDirection.Left,
@@ -452,10 +442,13 @@ fun NavigationPage(
                     AnimatedContentTransitionScope.SlideDirection.Left,
                     animationSpec = tween(durationMillis = 300)
                 )
-            }
-        ) {
+            },
+            arguments = listOf(navArgument("groupIDForSetting") { type = NavType.StringType })
+        ) { backStackEntry ->
             onBottomBarVisibilityChange(false)
-            GroupSettingPage()
+            val groupIDForSetting = backStackEntry.arguments?.getString("groupIDForSetting") ?: ""
+            GroupSettingPage(groupId = groupIDForSetting)
         }
+
     }
 }

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DaoPersonal {
+
     @Query("SELECT * FROM PersonalDataClass ORDER BY expenseDate DESC")
     fun getAllPersonalExpense(): Flow<List<PersonalDataClass>>
 

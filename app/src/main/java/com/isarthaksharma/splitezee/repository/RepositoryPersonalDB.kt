@@ -13,6 +13,7 @@ class RepositoryPersonalDB @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
     val allExpenses: Flow<List<PersonalDataClass>> = dao.getAllPersonalExpense()
+
     suspend fun addPersonalExpense(expense: PersonalDataClass) {
         dao.addPersonalExpense(expense)
     }
