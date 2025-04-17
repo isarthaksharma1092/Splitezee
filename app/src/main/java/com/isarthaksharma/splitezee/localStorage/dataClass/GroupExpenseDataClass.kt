@@ -1,9 +1,20 @@
 package com.isarthaksharma.splitezee.localStorage.dataClass
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity(
+    tableName = "GroupExpenseDataClass",
+    foreignKeys = [ForeignKey(
+        entity = GroupDataClass::class,
+        parentColumns = ["groupId"],
+        childColumns = ["groupId"],
+        onDelete = ForeignKey.CASCADE
+    )],
+    indices = [Index("groupId")]
+)
 data class GroupExpenseDataClass(
     @PrimaryKey
     val expenseId: String,

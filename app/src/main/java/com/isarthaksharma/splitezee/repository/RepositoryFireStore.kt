@@ -30,34 +30,6 @@ class RepositoryFireStore @Inject constructor(private val firestore: FirebaseFir
             }
     }
 
-//    fun fetchUserInfoByEmail(
-//        email: String,
-//        onResult: (Boolean, String?, String?, String?) -> Unit
-//    ) {
-//        FirebaseFirestore.getInstance().collection("users")
-//            .whereEqualTo("email", email)
-//            .addSnapshotListener { value, error ->
-//                if (error != null) {
-//                    Log.e("FirestoreDebug", "Error fetching user info: ${error.message}", error)
-//                    onResult(false, null, null, null)
-//                    return@addSnapshotListener
-//                }
-//
-//                Log.d("FirestoreDebug", "Query result: ${value?.documents}")
-//
-//                val doc = value?.documents?.firstOrNull()
-//                if (doc != null) {
-//                    val name = doc.getString("name")
-//                    val profileImage = doc.getString("profilePic")
-//                    val userId = doc.getString("userId")
-//                    onResult(true, name, profileImage, userId)
-//                } else {
-//                    onResult(false, null, null, null)
-//                }
-//            }
-//    }
-
-
     suspend fun uploadPersonalExpense(
         userId: String,
         expense: PersonalDataClass,
@@ -73,30 +45,6 @@ class RepositoryFireStore @Inject constructor(private val firestore: FirebaseFir
             Log.d("FireStore", "Expense added successfully with custom ID!")
         } catch (e: Exception) {
             Log.e("FireStore", "Failed to add expense: ${e.message}")
-        }
-    }
-
-
-    suspend fun createGroup(
-        groupName: String,
-        createdByEmail: String,
-        members: List<String>
-    ): Result<String> {
-        val groupId = firestore.collection("groups").document().id
-        val groupData = hashMapOf(
-            "groupId" to groupId,
-            "groupName" to groupName,
-            "createdBy" to createdByEmail,
-            "members" to members,
-            "totalAmount" to 0.0
-        )
-
-        return try {
-            firestore.collection("groups").document(groupId).set(groupData).await()
-            Result.success("Group created successfully!")
-        } catch (e: Exception) {
-            Log.e("FireStore", "Error creating group: ${e.message}")
-            Result.failure(e)
         }
     }
 
@@ -135,6 +83,48 @@ class RepositoryFireStore @Inject constructor(private val firestore: FirebaseFir
             )
         } catch (e: Exception) {
             Log.e("FireStore", "Error updating expense in Firestore: ${e.message}")
+        }
+    }
+
+// ************************************* Group Upload *************************************
+
+    // Uploading GroupId for Each User
+    suspend fun uploadGroupId(userId: String, groupId: String) {
+        val firestoreRef = FirebaseFirestore.getInstance()
+            .collection("users")
+            .document(userId)
+            .collection("groups")
+            .document(groupId)
+
+        val data = mapOf(
+            "groupId" to groupId,
+            "joinedAt" to System.currentTimeMillis()
+        )
+        try {
+            firestoreRef.set(data).await()
+            Log.d("FireStore", "GroupId added successfully !")
+        } catch (e: Exception) {
+            Log.e("FireStore", "Failed to add GroupID: ${e.message}")
+        }
+    }
+
+    // Uploading Group Info
+    suspend fun createGroup(groupId:String, groupName: String,adminName:String,groupCreation:Long) {
+        val firestoreRef = FirebaseFirestore.getInstance()
+            .collection("groups_collection")
+            .document(groupId)
+
+        val data = mapOf(
+            "groupName" to groupName,
+            "adminName" to adminName,
+            "groupCreation" to groupCreation
+        )
+
+        try {
+            firestoreRef.set(data).await()
+            Log.d("FireStore", "Group created successfully !")
+        } catch (e: Exception) {
+            Log.e("FireStore", "Failed to add Group: ${e.message}")
         }
     }
 }

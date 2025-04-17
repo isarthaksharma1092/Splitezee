@@ -2,7 +2,6 @@ package com.isarthaksharma.splitezee.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
@@ -49,68 +48,24 @@ class ViewModelFireStore @Inject constructor(
         }
     }
 
-    // *************** Group ***************
-    fun createGroup(groupName: String, members: List<String>) {
-        val userEmail = FirebaseAuth.getInstance().currentUser?.email ?: return
-        val groupId = firestore.collection("groups").document().id
-
-        val groupData = hashMapOf(
-            "groupId" to groupId,
-            "groupName" to groupName,
-            "createdBy" to userEmail,
-            "members" to members + userEmail,
-            "totalAmount" to 0.0
-        )
-
+    fun updatePersonalExpense(expense: PersonalDataClass) {
+        val userId = Firebase.auth.currentUser?.uid ?: return
         viewModelScope.launch {
-            try {
-                firestore.collection("groups").document(groupId).set(groupData)
-                _groupCreationStatus.value = "Group created successfully!"
-            } catch (e: Exception) {
-                _groupCreationStatus.value = "Error creating group: ${e.message}"
-            }
+            repositoryFireStore.updatePersonalExpense(userId, expense)
         }
     }
 
-    /*
-    fun fetchUserInfoByEmail(
-        email: String,
-        onResult: (GroupMemberDataClass) -> Unit
-    ) {
-        firestoreI.collection("Users")
-            .whereEqualTo("email", email)
-            .get()
-            .addOnSuccessListener { documents ->
-                val doc = documents.firstOrNull()
-                val currentUser = FirebaseAuth.getInstance().currentUser
+// ************************************* Group Upload *************************************
 
-                val member = GroupMemberDataClass(
-                    groupId = "",
-                    userId = doc?.getString("userID") ?: if (email == currentUser?.email) currentUser.uid else null,
-                    email = email,
-                    displayName = doc?.getString("name") ?: email.substringBefore("@"),
-                    profileImage = doc?.getString("profilePic"),
-                    registered = true
-                )
-                onResult(member)
-            }
-            .addOnFailureListener {
-                val member = GroupMemberDataClass(
-                    groupId = "",
-                    userId = null,
-                    email = email,
-                    displayName = email.substringBefore("@"),
-                    profileImage = null,
-                    registered = false
-                )
-                onResult(member)
-            }
+    fun uploadGroupId(userId: String,groupId:String){
+        viewModelScope.launch {
+            repositoryFireStore.uploadGroupId(userId, groupId)
+        }
     }
-     */
 
     fun fetchUserInfoByEmail(
         email: String,
-        onResult: (String?, String?, String?) -> Unit // name, profilePic, userId
+        onResult: (String?, String?, String?) -> Unit
     ) {
         repositoryFireStore.fetchUserInfoByEmail(email) { success, name, profilePic, userId ->
             if (success) {
@@ -121,10 +76,9 @@ class ViewModelFireStore @Inject constructor(
         }
     }
 
-    fun updatePersonalExpense(expense: PersonalDataClass) {
-        val userId = Firebase.auth.currentUser?.uid ?: return
+    fun createGroup(groupId:String, groupName: String,adminName:String,groupCreation:Long) {
         viewModelScope.launch {
-            repositoryFireStore.updatePersonalExpense(userId, expense)
+            repositoryFireStore.createGroup(groupId, groupName, adminName, groupCreation)
         }
     }
 }

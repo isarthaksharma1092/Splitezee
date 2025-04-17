@@ -19,7 +19,7 @@ android {
         minSdk = 28
         targetSdk = 35
         versionCode = 2
-        versionName = "1.7.2-beta"
+        versionName = "1.8.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -69,9 +69,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // Material UI & lifecycle
-    implementation("androidx.compose.material3:material3:1.4.0-alpha11")
-    implementation("androidx.compose.material3:material3-window-size-class:1.3.1")
-    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.4.0-alpha11")
+    implementation("androidx.compose.material3:material3:1.4.0-alpha12")
+    implementation("androidx.compose.material3:material3-window-size-class:1.3.2")
+    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.4.0-alpha12")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     // Coroutines
@@ -83,10 +83,10 @@ dependencies {
     ksp("com.google.dagger:hilt-android-compiler:2.51.1")
 
     // Room Dependencies
-    implementation("androidx.room:room-runtime:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
-    annotationProcessor("androidx.room:room-compiler:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
+    implementation("androidx.room:room-runtime:2.7.0")
+    ksp("androidx.room:room-compiler:2.7.0")
+    annotationProcessor("androidx.room:room-compiler:2.7.0")
+    implementation("androidx.room:room-ktx:2.7.0")
 
     // Retrofit & Gson Converter & Picasso
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
@@ -106,7 +106,6 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
-//    implementation ("com.google.android.gms:play-services:24.0.0")
 
     // Credential Manager
     implementation("androidx.credentials:credentials:1.5.0")
