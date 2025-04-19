@@ -424,8 +424,8 @@ fun NavigationPage(
         ) { backStackEntry ->
             onBottomBarVisibilityChange(false)
             val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
-            GroupDetailsPage(groupId = groupId) {
-                navController.navigate("${NavigationUtility.GroupDetailsPage}/$it")
+            GroupDetailsPage(groupId = groupId) { groupIdForSettings ->
+                navController.navigate("${NavigationUtility.GroupSettingPage}/$groupIdForSettings")
             }
         }
 
@@ -449,6 +449,5 @@ fun NavigationPage(
             val groupIDForSetting = backStackEntry.arguments?.getString("groupIDForSetting") ?: ""
             GroupSettingPage(groupId = groupIDForSetting)
         }
-
     }
 }

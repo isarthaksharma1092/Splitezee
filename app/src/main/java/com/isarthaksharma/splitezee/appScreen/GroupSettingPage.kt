@@ -59,7 +59,7 @@ fun GroupSettingPage(
                             text = it.groupName,
                             modifier = Modifier.fillMaxWidth(),
                             style = MaterialTheme.typography.displayMedium,
-                            color = MaterialTheme.colorScheme.background,
+                            color = MaterialTheme.colorScheme.onBackground,
                             textAlign = TextAlign.Justify
                         )
                     }
@@ -89,7 +89,7 @@ fun GroupSettingPage(
                     color = MaterialTheme.colorScheme.onBackground,
                     style = MaterialTheme.typography.titleMedium
                 )
-                Spacer(modifier = Modifier.width(14.dp))
+                Spacer(modifier = Modifier.width(7.dp))
                 groupDetailPage?.let {
                     Text(
                         text = it.groupName,
