@@ -6,7 +6,7 @@ object NavigationUtility {
     const val HomePage = "HomePage"
     const val SettingPage = "SettingPage"
     const val LoginPage = "LoginPage"
-    const val FinancePage = "FinancePage"
+    const val NotificationsPage = "NotificationsPage"
     const val GroupDetailsPage = "GroupDetailsPage"
     const val GroupSettingPage = "GroupSettingPage"
 }

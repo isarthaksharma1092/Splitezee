@@ -20,11 +20,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -57,12 +57,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.isarthaksharma.splitezee.appScreen.FinancePage
 import com.isarthaksharma.splitezee.appScreen.GroupDetailsPage
 import com.isarthaksharma.splitezee.appScreen.GroupPage
 import com.isarthaksharma.splitezee.appScreen.GroupSettingPage
 import com.isarthaksharma.splitezee.appScreen.HomePage
 import com.isarthaksharma.splitezee.appScreen.LoginPage
+import com.isarthaksharma.splitezee.appScreen.NotificationsPage
 import com.isarthaksharma.splitezee.appScreen.SettingPage
 import com.isarthaksharma.splitezee.appScreen.SplashScreen
 import com.isarthaksharma.splitezee.dataClass.BottomDataClass
@@ -244,10 +244,10 @@ fun bottomItems(): List<BottomDataClass> {
             unselectedIcon = Icons.Outlined.Groups
         ),
         BottomDataClass(
-            title = "Finance",
-            label = "FinancePage",
-            selectedIcon = Icons.Filled.CreditCard,
-            unselectedIcon = Icons.Outlined.CreditCard
+            title = "Notifications",
+            label = "NotificationsPage",
+            selectedIcon = Icons.Filled.Notifications,
+            unselectedIcon = Icons.Outlined.Notifications
         ),
     )
     return item
@@ -388,7 +388,7 @@ fun NavigationPage(
 
         // Finance Page
         composable(
-            route = NavigationUtility.FinancePage,
+            route = NavigationUtility.NotificationsPage,
             enterTransition = {
                 slideIntoContainer(
                     AnimatedContentTransitionScope.SlideDirection.Left,
@@ -403,7 +403,7 @@ fun NavigationPage(
             }
         ) {
             onBottomBarVisibilityChange(true)
-            FinancePage(modifier = modifier)
+            NotificationsPage(modifier = modifier)
         }
 
         composable(

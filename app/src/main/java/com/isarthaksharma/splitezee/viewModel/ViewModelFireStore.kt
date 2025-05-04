@@ -55,7 +55,7 @@ class ViewModelFireStore @Inject constructor(
         }
     }
 
-// ************************************* Group Upload *************************************
+// ************************************* Group Info *************************************
 
     fun uploadGroupId(userId: String,groupId:String){
         viewModelScope.launch {
@@ -81,4 +81,6 @@ class ViewModelFireStore @Inject constructor(
             repositoryFireStore.createGroup(groupId, groupName, adminName, groupCreation)
         }
     }
+
+
 }
